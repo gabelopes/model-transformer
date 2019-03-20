@@ -1,8 +1,6 @@
-:- dynamic edge/3.
-:- dynamic vertex/2.
+:- use_module('graph/graph').
 
-:- consult("common.pl").
-:- consult("class.pl").
-:- consult("attribute.pl").
-:- consult("method.pl").
-:- consult("parameter.pl").
+start :-
+	load_graph("D:/Workspace/MitrasTest/a.gpl"),
+	find_class_by_name("Employee", X),
+	write(X).
