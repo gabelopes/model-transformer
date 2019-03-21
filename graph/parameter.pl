@@ -5,20 +5,20 @@
 	get_parameter_name/2
 ]).
 
-:- use_module(graph, [get_edge/3, get_vertex/2]).
+:- use_module(graph, [edge/3, vertex/2]).
 :- use_module(entity).
 
 % Assertion Theorems
 is_parameter(Parameter) :-
-	get_vertex(parameter, Parameter),
-	get_edge(_, parameter, Parameter).
+	vertex(parameter, Parameter),
+	edge(_, parameter, Parameter).
 
 % Search Theorems
 find_parameter_by_name(Class, Method, Name, Parameter) :-
 	find_method(Class, Method, MethodLabel),
-	get_edge(Parameter, name, Name),
-	get_vertex(parameter, Parameter),
-	get_edge(MethodLabel, parameter, Parameter).
+	edge(Parameter, name, Name),
+	vertex(parameter, Parameter),
+	edge(MethodLabel, parameter, Parameter).
 
 % Properties Theorems
 get_parameter_modifiers(Parameter, Modifiers) :-

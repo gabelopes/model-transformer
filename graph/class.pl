@@ -10,16 +10,16 @@
 	get_class_methods/2
 ]).
 
-:- use_module(graph, [get_edge/3, get_vertex/2]).
+:- use_module(graph, [edge/3, vertex/2]).
 :- use_module(entity).
 
 % Assertion Theorems
-is_class(Label) :- get_vertex(class, Label).
+is_class(Label) :- vertex(class, Label).
 
 % Search Theorems
 find_class_by_name(Name, Class) :-
 	is_class(Class),
-	get_edge(Class, name, Name).
+	edge(Class, name, Name).
 
 find_class(Text, Class) :-
 	atom(Text),
@@ -44,17 +44,17 @@ get_class_package(Class, Package) :-
 
 get_class_parent(Class, Parent) :-
 	is_class(Class),
-	get_edge(Class, parent, Parent).
+	edge(Class, parent, Parent).
 
 get_class_interfaces(Class, Interfaces) :-
 	is_class(Class),
-	findall(Interface, get_edge(Class, interface, Interface), Interfaces).
+	findall(Interface, edge(Class, interface, Interface), Interfaces).
 
 % Content Theorems
 get_class_attributes(Text, Attributes) :-
 	find_class(Text, Class),
-	findall(Attribute, get_edge(Class, attribute, Attribute), Attributes).
+	findall(Attribute, edge(Class, attribute, Attribute), Attributes).
 
 get_class_methods(Text, Methods) :-
 	find_class(Text, Class),
-	findall(Method, get_edge(Class, method, Method), Methods).
+	findall(Method, edge(Class, method, Method), Methods).

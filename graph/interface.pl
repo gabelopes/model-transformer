@@ -8,16 +8,16 @@
 	get_interface_methods/2
 ]).
 
-:- use_module(graph, [get_edge/3, get_vertex/2]).
+:- use_module(graph, [edge/3, vertex/2]).
 :- use_module(entity).
 
 % Assertion Theorems
-is_interface(Label) :- get_vertex(interface, Label).
+is_interface(Label) :- vertex(interface, Label).
 
 % Search Theorems
 find_interface_by_name(Name, Interface) :-
 	is_interface(Interface),
-	get_edge(Interface, name, Name).
+	edge(Interface, name, Name).
 
 find_interface(Text, Interface) :-
 	atom(Text),
@@ -42,9 +42,9 @@ get_interface_package(Interface, Package) :-
 
 get_interface_parents(Interface, Parents) :-
 	is_interface(Interface),
-	findall(Parent, get_edge(Interface, parent, Parent), Parents).
+	findall(Parent, edge(Interface, parent, Parent), Parents).
 
 % Content Theorems
 get_interface_methods(Text, Methods) :-
 	find_interface(Text, Interface),
-	findall(Method, get_edge(Interface, method, Method), Methods).
+	findall(Method, edge(Interface, method, Method), Methods).

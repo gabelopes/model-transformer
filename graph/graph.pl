@@ -1,8 +1,8 @@
 :- module(graph, [
 	load_graph/1,
 	unload_graph/0,
-	get_edge/3,
-	get_vertex/2
+	edge/3,
+	vertex/2
 ]).
 
 :- reexport(entity).
@@ -22,12 +22,6 @@
 :- dynamic vertex/2.
 
 % Graph Theorems
-get_edge(Head, Label, Tail) :-
-	edge(Head, Label, Tail).
-
-get_vertex(Descriptor, Label) :-
-	vertex(Descriptor, Label).
-
 find_classes(Classes) :-
 	findall(Class, vertex(class, Class), Classes).
 
