@@ -1,4 +1,5 @@
 :- module(class, [
+	is_class/1,
 	find_class_by_name/2,
 	find_class/2,
 	get_class_modifiers/2,

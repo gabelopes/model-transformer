@@ -1,4 +1,8 @@
-:- module(strings, [replace_all/4, join_strings/3]).
+:- module(text, [
+	replace_all/4, 
+	join_strings/3,
+	join_atoms/3
+]).
 
 join_strings(Initial, [], _, Initial).
 join_strings(Initial, [Head|Tail], Delimiter, Joined) :-
@@ -8,6 +12,15 @@ join_strings(Initial, [Head|Tail], Delimiter, Joined) :-
 
 join_strings([Head|Tail], Delimiter, Joined) :-
 	join_strings(Head, Tail, Delimiter, Joined).
+
+join_atoms(Initial, [], _, Initial).
+join_atoms(Initial, [Head|Tail], Delimiter, Joined) :-
+	atom_concat(Initial, Delimiter, X),
+	join_atoms(Head, Tail, Delimiter, Y),
+	atom_concat(X, Y, Joined).
+
+join_atoms([Head|Tail], Delimiter, Joined) :-
+	join_atoms(Head, Tail, Delimiter, Joined).
 
 replace_all(String, Old, New, Replaced) :-
 	split_string(String, Old, "", Parts),

@@ -2,7 +2,9 @@
 	load_graph/1,
 	unload_graph/0,
 	edge/3,
-	vertex/2
+	vertex/2,
+	create_edge/3,
+	create_vertex/2
 ]).
 
 :- reexport(entity).
@@ -22,6 +24,12 @@
 :- dynamic vertex/2.
 
 % Graph Theorems
+create_edge(Head, Label, Tail) :-
+	assertz(edge(Head, Label, Tail)).
+
+create_vertex(Descriptor, Label) :-
+	assertz(vertex(Descriptor, Label)).
+
 find_classes(Classes) :-
 	findall(Class, vertex(class, Class), Classes).
 
