@@ -10,7 +10,9 @@
 :- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
 :- use_module(common, [is_type/1, get_name/2, get_type/2, get_modifiers/2]).
 :- use_module(class, [is_class/1, find_class/2]).
+:- use_module(method, [is_method/1, add_method/6]).
 :- use_module('../representation/qualified_name').
+:- use_module('../representation/text', [capitalize/2]).
 
 % Assertion Theorems
 is_attribute(Attribute) :-
@@ -41,7 +43,8 @@ get_attribute_name(Attribute, Name) :-
 	is_attribute(Attribute),
 	get_name(Attribute, Name).
 
-% Transformations
+%% Transformations
+% Validation Theorems
 attribute_exists(Class, Name) :-
 	edge(Class, attribute, Attribute),
 	edge(Attribute, name, Name).
@@ -51,12 +54,46 @@ can_add_attribute(Class, Name, Type) :-
 	is_type(Type),
 	\+ attribute_exists(Class, Name).
 
-add_attribute(Class, Name, Type, Attribute) :-
+% Creation Theorems
+create_modifiers_edges(Attribute, []).
+create_modifiers_edges(Attribute, [Modifier|Rest]) :-
+	create_edge(Attribute, modifier, Modifier),
+	create_modifiers_edges(Attribute, Rest).
+
+create_getter(Class, Attribute, Type, Name) :-
+	capitalize(Name, Capitalized),
+	string_concat("get", Capitalized, MethodName),
+	add_method(Class, ['public'], Type, MethodName, [], Method),
+	mark_getter(Attribute, Method).
+
+create_setter(Class, Attribute, Type, Name) :-
+	capitalize(Name, Capitalized),
+	string_concat("set", Capitalized, MethodName),
+	add_method(Class, ['public'], void, MethodName, [parameter([], Type, Name)], Method),
+	mark_setter(Attribute, Method).
+
+create_accessors(Class, Attribute, Type, Name) :-
+	create_getter(Class, Attribute, Type, Name),
+	create_setter(Class, Attribute, Type, Name).
+
+add_attribute(Class, Modifiers, Type, Name, Attribute) :-
 	can_add_attribute(Class, Name, Type),
 	generate_qualified_name(Class, Name, Attribute),
 	create_vertex(attribute, Attribute),
 	create_edge(Attribute, unsynchronized, Attribute),
 	create_edge(Class, attribute, Attribute),
-	create_edge(Attribute, modifier, private),
+	create_modifiers_edges(Attribute, Modifiers),
+	create_edge(Attribute, type, Type),
 	create_edge(Attribute, name, Name),
-	create_edge(Attribute, type, Type).
+	create_accessors(Class, Attribute, Type, Name).
+
+% Metadata Theorems
+mark_getter(Attribute, Method) :-
+	is_attribute(Attribute),
+	is_method(Method),
+	edge(Attribute, getter, Method).
+
+mark_setter(Attribute, Method) :-
+	is_attribute(Attribute),
+	is_method(Method),
+	edge(Attribute, setter, Method).
