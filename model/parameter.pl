@@ -3,6 +3,9 @@
 	get_parameter_modifiers/2,
 	get_parameter_type/2,
 	get_parameter_name/2,
+	get_parameter_order/2,
+	compare_parameters/3,
+	sort_parameters/2,
 	add_parameter/6
 ]).
 
@@ -36,6 +39,26 @@ get_parameter_type(Parameter, Type) :-
 get_parameter_name(Parameter, Name) :-
 	is_parameter(Parameter),
 	get_name(Parameter, Name).
+
+get_parameter_order(Parameter, Order) :-
+	is_parameter(Parameter),
+	edge(Parameter, order, Order).
+
+% Comparative Theorems
+compare_orders(<, OrderA, OrderB) :-
+	OrderA < OrderB.
+compare_orders(>, OrderA, OrderB) :-
+	OrderA > OrderB.
+compare_orders(=, _, _).
+
+compare_parameters(Delta, ParameterA, ParameterB) :-
+	get_parameter_order(ParameterA, OrderA),
+	get_parameter_order(ParameterB, OrderB),
+	compare_orders(Delta, OrderA, OrderB).
+
+% Sorting Theorems
+sort_parameters(Parameters, Sorted) :-
+	predsort(compare_parameters, Parameters, Sorted).
 
 %% Transformation Theorems
 % Validation Theorems

@@ -7,6 +7,7 @@
 	get_method_return/2,
 	get_method_name/2,
 	get_method_parameters/2,
+	get_method_parameters_sorted/2,
 	add_method/6
 ]).
 
@@ -14,7 +15,7 @@
 :- use_module(common, [is_type/1, get_name/2, get_modifiers/2]).
 :- use_module(class, [is_class/1, find_class/2]).
 :- use_module(modifier, [is_modifier/1]).
-:- use_module(parameter, [add_parameter/6]).
+:- use_module(parameter, [sort_parameters/2, add_parameter/6]).
 :- use_module('../representation/qualified_name').
 :- use_module('../arrays').
 
@@ -59,6 +60,10 @@ get_method_name(Method, Name) :-
 get_method_parameters(Method, Parameters) :-
 	is_method(Method),
 	findall(Parameter, edge(Method, parameter, Parameter), Parameters).
+
+get_method_parameters_sorted(Method, SortedParameters) :-
+	get_method_parameters(Method, Parameters),
+	sort_parameters(Parameters, SortedParameters).
 
 %% Transformation Theorems
 % Validation Theorems
