@@ -8,8 +8,7 @@
 	get_method_parameters/2
 ]).
 
-:- use_module(graph, [edge/3, vertex/2]).
-:- use_module(entity).
+:- use_module(graph).
 
 % Assertion Theorems
 is_method(Method) :-
@@ -52,3 +51,11 @@ get_method_name(Method, Name) :-
 get_method_parameters(Method, Parameters) :-
 	is_method(Method),
 	findall(Parameter, edge(Method, parameter, Parameter), Parameters).
+
+% Transformation Theorems
+can_add_method(Class, Return, Parameters) :-
+	is_class(Class),
+	is_type(Return).
+
+add_method(Class, Name, Modifiers, Return, Parameters) :-
+	can_add_method(Class, Return, Parameters).

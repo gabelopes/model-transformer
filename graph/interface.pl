@@ -8,8 +8,7 @@
 	get_interface_methods/2
 ]).
 
-:- use_module(graph, [edge/3, vertex/2]).
-:- use_module(entity).
+:- use_module(graph).
 
 % Assertion Theorems
 is_interface(Label) :- vertex(interface, Label).

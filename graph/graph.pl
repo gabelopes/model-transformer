@@ -7,7 +7,7 @@
 	create_vertex/2
 ]).
 
-:- reexport(entity).
+:- reexport(common).
 :- reexport(interface).
 :- reexport(class).
 :- reexport(attribute).

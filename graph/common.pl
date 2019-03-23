@@ -1,4 +1,4 @@
-:- module(entity, [
+:- module(common, [
 	get_name/2,
 	get_package/2,
 	is_type/1,

@@ -5,8 +5,7 @@
 	get_parameter_name/2
 ]).
 
-:- use_module(graph, [edge/3, vertex/2]).
-:- use_module(entity).
+:- use_module(graph).
 
 % Assertion Theorems
 is_parameter(Parameter) :-
