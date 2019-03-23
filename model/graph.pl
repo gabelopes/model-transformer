@@ -89,7 +89,7 @@ load_graph(File) :-
 	create_links(Uses),
 	consult_all(Uses),
 	retract_uses,
-	set_loaded(true).
+	set_loaded(true), !.
 
 unload_graph :-
 	retract_all,
