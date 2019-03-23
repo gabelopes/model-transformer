@@ -7,9 +7,7 @@
 	add_attribute/4
 ]).
 
-:- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
-:- use_module(entity).
-:- use_module(class, [is_class/1]).
+:- use_module(graph).
 :- use_module('../representation/qualified_name').
 
 % Assertion Theorems
@@ -42,15 +40,21 @@ get_attribute_name(Attribute, Name) :-
 	get_name(Attribute, Name).
 
 % Transformations
-add_attribute(Class, Name, Type, Attribute) :-
+attribute_exists(Class, Name) :-
+	edge(Class, attribute, Attribute),
+	edge(Attribute, name, Name).
+
+can_add_attribute(Class, Name, Type) :-
 	is_class(Class),
 	is_type(Type),
+	\+ attribute_exists(Class, Name).
+
+add_attribute(Class, Name, Type, Attribute) :-
+	can_add_attribute(Class, Name, Type),
 	generate_qualified_name(Class, Name, Attribute),
 	create_vertex(attribute, Attribute),
 	create_edge(Attribute, unsynchronized, Attribute),
 	create_edge(Class, attribute, Attribute),
 	create_edge(Attribute, modifier, private),
 	create_edge(Attribute, name, Name),
-	create_edge(Attribute, type, Type),
-	generate_qualified_name(Class, Name, Attribute2),
-	write(Attribute2).
+	create_edge(Attribute, type, Type).
