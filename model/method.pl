@@ -1,4 +1,5 @@
 :- module(method, [
+	is_method/1,
 	find_method_by_name/3,
 	find_method/3,
 	get_method_class/2,
@@ -9,7 +10,7 @@
 	add_method/6
 ]).
 
-:- use_module(graph, [edge/3, vertex/2]).
+:- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
 :- use_module(common, [is_type/1, get_name/2, get_modifiers/2]).
 :- use_module(class, [is_class/1, find_class/2]).
 :- use_module(modifier, [is_modifier/1]).
@@ -80,15 +81,15 @@ can_add_method(Class, Modifiers, Return, Parameters) :-
 	parameters_have_different_names(Parameters).
 
 % Creation Theorems
-create_modifiers_edges(Method, []).
+create_modifiers_edges(_, []).
 create_modifiers_edges(Method, [Modifier|Rest]) :-
 	create_edge(Method, modifier, Modifier),
 	create_modifiers_edges(Method, Rest).
 
-create_parameters([]).
-create_parameters([parameter(Modifiers, Type, Name)|Rest]) :-
+create_parameters(_, []).
+create_parameters(Method, [parameter(Modifiers, Type, Name)|Rest]) :-
 	add_parameter(Method, Modifiers, Type, Name, _),
-	create_parameters(Rest).
+	create_parameters(Method, Rest).
 
 add_method(Class, Modifiers, Return, Name, Parameters, Method) :-
 	can_add_method(Class, Modifiers, Return, Parameters),
@@ -98,5 +99,5 @@ add_method(Class, Modifiers, Return, Name, Parameters, Method) :-
 	create_edge(Class, method, Method),
 	create_modifiers_edges(Method, Modifiers),
 	create_edge(Method, return, Return),
-	create_edge(Method, name, Name)
-	create_parameters(Parameters).
+	create_edge(Method, name, Name),
+	create_parameters(Method, Parameters).

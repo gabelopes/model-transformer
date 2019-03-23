@@ -1,7 +1,8 @@
 :- module(text, [
 	replace_all/4, 
 	join_strings/3,
-	join_atoms/3
+	join_atoms/3,
+	capitalize/2
 ]).
 
 join_strings(Initial, [], _, Initial).
