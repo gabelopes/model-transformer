@@ -1,4 +1,4 @@
-:- use_module('graph/graph').
+:- use_module('model/model').
 
 start :-
 	load_graph("D:/Workspace/MitrasTest/Graph.pl"),
