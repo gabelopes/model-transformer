@@ -25,3 +25,14 @@ join_atoms([Head|Tail], Delimiter, Joined) :-
 replace_all(String, Old, New, Replaced) :-
 	split_string(String, Old, "", Parts),
 	join_strings(Parts, New, Replaced).
+
+capitalize(Text, Capitalized) :-
+	atom(Text),
+	atom_chars(Text, [FirstChar|Rest]),
+	upcase_atom(FirstChar, CapitalizedFirstChar),
+	atom_chars(Capitalized, [CapitalizedFirstChar|Rest]).
+capitalize(Text, Capitalized) :-
+	string(Text),
+	string_chars(Text, [FirstChar|Rest]),
+	upcase_atom(FirstChar, CapitalizedFirstChar),
+	string_chars(Capitalized, [CapitalizedFirstChar|Rest]).
