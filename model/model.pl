@@ -7,5 +7,6 @@
 	graph,
 	interface,
 	method,
+	modifier,
 	parameter
 ]).
