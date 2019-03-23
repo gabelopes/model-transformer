@@ -3,7 +3,7 @@
 	get_parameter_modifiers/2,
 	get_parameter_type/2,
 	get_parameter_name/2,
-	add_parameter/5
+	add_parameter/6
 ]).
 
 :- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
@@ -55,11 +55,12 @@ create_modifiers_edges(Parameter, [Modifier|Rest]) :-
 	create_edge(Parameter, modifier, Modifier),
 	create_modifiers_edges(Parameter, Rest).
 
-add_parameter(Method, Modifiers, Type, Name, Parameter) :-
+add_parameter(Method, Modifiers, Type, Name, Order, Parameter) :-
 	can_add_parameter(Method, Modifiers, Type),
 	generate_qualified_name(Method, Name, Parameter),
 	create_vertex(parameter, Parameter),
 	create_edge(Parameter, unsynchronized, Parameter),
 	create_modifiers_edges(Parameter, Modifiers),
 	create_edge(Parameter, type, Type),
-	create_edge(Parameter, name, Name).
+	create_edge(Parameter, name, Name),
+	create_edge(Parameter, order, Order).

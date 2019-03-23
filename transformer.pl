@@ -14,5 +14,7 @@ start :-
 		parameter([], 'String', person),
 		parameter([], 'boolean', old)
 	], _),
-	findall(X, edge(X, unsynchronized, X), Unsynchronized),	
+	findall(X, edge(X, unsynchronized, X), Unsynchronized),
+	findall(param(N, O), (vertex(parameter, N), edge(N, unsynchronized, N), edge(N, order, O)), UnsyncParams),
+	print_all(UnsyncParams),
 	print_all(Unsynchronized).

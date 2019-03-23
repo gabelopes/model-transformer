@@ -14,7 +14,7 @@
 :- use_module(common, [is_type/1, get_name/2, get_modifiers/2]).
 :- use_module(class, [is_class/1, find_class/2]).
 :- use_module(modifier, [is_modifier/1]).
-:- use_module(parameter, [add_parameter/5]).
+:- use_module(parameter, [add_parameter/6]).
 :- use_module('../representation/qualified_name').
 :- use_module('../arrays').
 
@@ -86,10 +86,14 @@ create_modifiers_edges(Method, [Modifier|Rest]) :-
 	create_edge(Method, modifier, Modifier),
 	create_modifiers_edges(Method, Rest).
 
+create_parameters(_, [], _).
+create_parameters(Method, [parameter(Modifiers, Type, Name)|Rest], Order) :-
+	add_parameter(Method, Modifiers, Type, Name, Order, _),
+	NextOrder is Order + 1, !,
+	create_parameters(Method, Rest, NextOrder).
 create_parameters(_, []).
-create_parameters(Method, [parameter(Modifiers, Type, Name)|Rest]) :-
-	add_parameter(Method, Modifiers, Type, Name, _),
-	create_parameters(Method, Rest).
+create_parameters(Method, Parameters) :-
+	create_parameters(Method, Parameters, 0), !.
 
 add_method(Class, Modifiers, Return, Name, Parameters, Method) :-
 	can_add_method(Class, Modifiers, Return, Parameters),
