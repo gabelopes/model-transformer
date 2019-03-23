@@ -7,13 +7,6 @@
 	create_vertex/2
 ]).
 
-:- reexport(common).
-:- reexport(interface).
-:- reexport(class).
-:- reexport(attribute).
-:- reexport(method).
-:- reexport(parameter).
-
 :- multifile edge/3.
 :- multifile vertex/2.
 

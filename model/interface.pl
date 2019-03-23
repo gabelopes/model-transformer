@@ -8,10 +8,12 @@
 	get_interface_methods/2
 ]).
 
-:- use_module(graph).
+:- use_module(graph, [edge/3, vertex/2]).
+:- use_module(common, [get_name/2, get_package/2, get_modifiers/2]).
 
 % Assertion Theorems
-is_interface(Label) :- vertex(interface, Label).
+is_interface(Label) :-
+	vertex(interface, Label).
 
 % Search Theorems
 find_interface_by_name(Name, Interface) :-

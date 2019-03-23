@@ -5,7 +5,9 @@
 	get_parameter_name/2
 ]).
 
-:- use_module(graph).
+:- use_module(graph, [edge/3, vertex/2]).
+:- use_module(common, [get_name/2, get_type/2, get_modifiers/2]).
+:- use_module(method, [find_method/3]).
 
 % Assertion Theorems
 is_parameter(Parameter) :-
@@ -26,7 +28,7 @@ get_parameter_modifiers(Parameter, Modifiers) :-
 
 get_parameter_type(Parameter, Type) :-
 	is_parameter(Parameter),
-	get_type(Type).
+	get_type(Parameter, Type).
 
 get_parameter_name(Parameter, Name) :-
 	is_parameter(Parameter),

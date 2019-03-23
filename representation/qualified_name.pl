@@ -3,7 +3,7 @@
 ]).
 
 :- use_module(text, [join_atoms/3]).
-:- use_module('../graph/graph', [vertex/2]).
+:- use_module('../model/graph', [vertex/2]).
 
 is_qualified_name_available(QualifiedName) :-
 	\+ vertex(_, QualifiedName).

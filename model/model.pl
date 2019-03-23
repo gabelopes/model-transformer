@@ -1,4 +1,4 @@
-:- module(model).
+:- module(model, []).
 
 :- reexport([
 	attribute,

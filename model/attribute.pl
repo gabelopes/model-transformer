@@ -7,7 +7,9 @@
 	add_attribute/4
 ]).
 
-:- use_module(graph).
+:- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
+:- use_module(common, [is_type/1, get_name/2, get_type/2, get_modifiers/2]).
+:- use_module(class, [is_class/1, find_class/2]).
 :- use_module('../representation/qualified_name').
 
 % Assertion Theorems

@@ -11,10 +11,12 @@
 	get_class_methods/2
 ]).
 
-:- use_module(graph).
+:- use_module(graph, [edge/3, vertex/2]).
+:- use_module(common, [get_name/2, get_package/2, get_modifiers/2]).
 
 % Assertion Theorems
-is_class(Label) :- vertex(class, Label).
+is_class(Label) :-
+	vertex(class, Label).
 
 % Search Theorems
 find_class_by_name(Name, Class) :-

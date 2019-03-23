@@ -8,7 +8,9 @@
 	get_method_parameters/2
 ]).
 
-:- use_module(graph).
+:- use_module(graph, [edge/3, vertex/2]).
+:- use_module(common, [is_type/1, get_name/2, get_modifiers/2]).
+:- use_module(class, [is_class/1, find_class/2]).
 
 % Assertion Theorems
 is_method(Method) :-
