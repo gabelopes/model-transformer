@@ -6,10 +6,6 @@
 	occurrences_del/3
 ]).
 
-has_multiple_occurrences_sel(Element, Array) :-
-	select(Element, Array, Differential),
-	member(Element, Differential).
-
 has_multiple_occurrences(Element, Array) :-
 	occurrences(Element, Array, Occurrences),
 	Occurrences > 1.
@@ -17,6 +13,10 @@ has_multiple_occurrences(Element, Array) :-
 has_multiple_occurrences_del(Element, Array) :-
 	occurrences_del(Element, Array, Occurrences),
 	Occurrences > 1.
+
+has_multiple_occurrences_sel(Element, Array) :-
+	select(Element, Array, Differential),
+	member(Element, Differential).
 
 occurrences(_, [], Count, Count).
 occurrences(Element, [Head|Tail], Count, Occurrences) :-
