@@ -15,7 +15,7 @@
 :- use_module(common, [is_type/1, get_name/2, get_modifiers/2]).
 :- use_module(class, [is_class/1, find_class/2]).
 :- use_module(modifier, [is_modifier/1]).
-:- use_module(parameter, [sort_parameters/2, add_parameter/6]).
+:- use_module(parameter, [get_parameter_type/2, sort_parameters/2, add_parameter/6]).
 :- use_module('../representation/qualified_name').
 :- use_module('../arrays').
 
@@ -79,11 +79,24 @@ parameters_have_different_names([parameter(_, _, Name)|Rest], Parameters) :-
 parameters_have_different_names(Parameters) :-
 	parameters_have_different_names(Parameters, Parameters).
 
-can_add_method(Class, Modifiers, Return, Parameters) :-
+parameters_have_same_types([], []).
+parameters_have_same_types([_|_], []) :- fail.
+parameters_have_same_types([], [_|_]) :- fail.
+parameters_have_same_types([parameter(_, Type, _)|VirtualRest], [Parameter|ExistingRest]) :-
+	get_parameter_type(Parameter, Type),
+	parameters_have_same_types(VirtualRest, ExistingRest).
+
+method_exists(Class, Name, Parameters) :-
+	find_method_by_name(Class, Name, FoundMethod),
+	get_method_parameters_sorted(FoundMethod, SortedExistingParameters),
+	parameters_have_same_types(Parameters, SortedExistingParameters).
+
+can_add_method(Class, Modifiers, Return, Name, Parameters) :-
 	is_class(Class),
 	is_type(Return),
 	modifiers_are_valid(Modifiers), !,
-	parameters_have_different_names(Parameters).
+	parameters_have_different_names(Parameters), !,
+	method_exists(Class, Name, Parameters).
 
 % Creation Theorems
 create_modifiers_edges(_, []).
@@ -101,7 +114,7 @@ create_parameters(Method, Parameters) :-
 	create_parameters(Method, Parameters, 0), !.
 
 add_method(Class, Modifiers, Return, Name, Parameters, Method) :-
-	can_add_method(Class, Modifiers, Return, Parameters),
+	can_add_method(Class, Modifiers, Return, Name, Parameters),
 	generate_qualified_name(Class, Name, Method),
 	create_vertex(method, Method),
 	create_edge(Method, unsynchronized, Method),
