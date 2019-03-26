@@ -87,7 +87,6 @@ add_attribute(Class, Modifiers, Type, Name, Attribute) :-
 	can_add_attribute(Class, Modifiers, Type, Name),
 	generate_qualified_name(Class, Name, Attribute),
 	create_vertex(attribute, Attribute),
-	create_edge(Attribute, unsynchronized, Attribute),
 	create_edge(Class, attribute, Attribute),
 	create_modifiers_edges(Attribute, Modifiers),
 	create_edge(Attribute, type, Type),

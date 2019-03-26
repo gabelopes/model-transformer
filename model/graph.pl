@@ -4,15 +4,18 @@
 	edge/3,
 	vertex/2,
 	create_edge/3,
-	create_vertex/2
+	create_vertex/2,
+	synchronize_graph/0
 ]).
+
+:- use_module('../io', [writefe/3]).
 
 :- multifile edge/3.
 :- multifile vertex/2.
 
 :- dynamic loaded/1.
 :- dynamic use/1.
-:- dynamic link/2.
+:- dynamic owner/2.
 :- dynamic edge/3.
 :- dynamic vertex/2.
 
@@ -20,8 +23,12 @@
 create_edge(Head, Label, Tail) :-
 	assertz(edge(Head, Label, Tail)).
 
+remove_edge(Head, Label, Tail) :-
+	retract(edge(Head, Label, Tail)).
+
 create_vertex(Descriptor, Label) :-
-	assertz(vertex(Descriptor, Label)).
+	assertz(vertex(Descriptor, Label)),
+	mark_unsynchronized(Label).
 
 find_classes(Classes) :-
 	findall(Class, vertex(class, Class), Classes).
@@ -37,26 +44,26 @@ retract_graph :-
 	retractall(vertex(_, _)).
 
 % Links Theorems
-create_link(File, Class) :-
+create_owner(Class, File) :-
 	is_branch_class(Class),
-	assertz(link(File, Class)).
-create_link(_, _).
+	assertz(owner(Class, File)).
+create_owner(_, _).
 
-create_links(_, []).
-create_links(File, [Class|Rest]) :-
-	create_link(File, Class),
-	create_links(File, Rest).
+create_owners([], _).
+create_owners([Class|Rest], File) :-
+	create_owner(Class, File),
+	create_owners(Rest, File).
 
-create_links([]).
-create_links([Use|Rest]) :-
+create_owners([]).
+create_owners([Use|Rest]) :-
 	consult(Use),
 	find_classes(Classes),
-	create_links(Use, Classes),
+	create_owners(Classes, Use),
 	retract_graph,
-	create_links(Rest).
+	create_owners(Rest).
 
-retract_links :-
-	retractall(link(_)).
+retract_owners :-
+	retractall(owner(_, _)).
 
 % Uses Theorems
 find_uses(Uses) :-
@@ -68,7 +75,7 @@ retract_uses :-
 % Module Theorems
 retract_all :-
 	retract_graph,
-	retract_links,
+	retract_owners,
 	retract_uses.
 
 % Consulting Theorems
@@ -86,7 +93,7 @@ load_graph(File) :-
 	loaded(false),
 	consult(File),
 	find_uses(Uses),
-	create_links(Uses),
+	create_owners(Uses),
 	consult_all(Uses),
 	retract_uses,
 	set_loaded(true), !.
@@ -94,3 +101,97 @@ load_graph(File) :-
 unload_graph :-
 	retract_all,
 	set_loaded(false).
+
+% Writing Theorems
+write_vertex(Stream, Descriptor, Label) :-
+	writefe(Stream, "vertex(~w, ~w).", [Descriptor, Label]),
+	nl(Stream).
+
+write_edges(_, []).
+write_edges(Stream, [edge(Head, Label, Tail)|Rest]) :-
+	writefe(Stream, "edge(~w, ~w, ~w).", [Head, Label, Tail]),
+	nl(Stream),
+	write_edges(Stream, Rest).
+
+start_writing(File, Stream) :-
+	open(File, append, Stream),
+	nl(Stream).
+
+finish_writing(Stream) :-
+	close(Stream).
+
+% Synchronizing Theorems
+mark_synchronized(Vertex) :-
+	vertex(_, Vertex),
+	remove_edge(Vertex, unsynchronized, Vertex).
+
+is_synchronized(Label) :-
+	\+ is_unsynchronized(Label).
+
+is_synchronized :-
+	\+ is_unsynchronized.
+
+mark_unsynchronized(Vertex) :-
+	vertex(_, Vertex),
+	create_edge(Vertex, unsynchronized, Vertex).
+
+is_unsynchronized(Label) :-
+	edge(Label, unsynchronized, Label).
+
+is_unsynchronized :-
+	edge(_, unsynchronized, _).
+
+find_owner(Label, File) :-
+	owner(Label, File).
+find_owner(Label, File) :-
+	\+ is_branch_class(Label),
+	edge(Parent, _, Label),
+	Parent \= Label,
+	vertex(_, Parent),
+	find_owner(Parent, File).
+
+find_unsynchronized_vertices(Vertices) :-
+	findall(vertex(Descriptor, Vertex), (
+		edge(Vertex, unsynchronized, Vertex),
+		vertex(Descriptor, Vertex)
+	), Vertices).
+
+find_unsynchronized_incoming_edges(Vertex, Edges) :-
+	findall(edge(Head, Label, Vertex), (
+		edge(Head, Label, Vertex),
+		Label \= unsynchronized,
+		vertex(_, Head),
+		is_synchronized(Head)
+	), Edges).
+
+find_unsynchronized_outgoing_edges(Vertex, Edges) :-
+	findall(edge(Vertex, Label, Tail), (
+		edge(Vertex, Label, Tail),
+		Label \= unsynchronized
+	), Edges).
+
+find_unsynchronized_edges(Vertex, Edges) :-
+	find_unsynchronized_incoming_edges(Vertex, IncomingEdges),
+	find_unsynchronized_outgoing_edges(Vertex, OutgoingEdges),
+	append(IncomingEdges, OutgoingEdges, Edges).
+
+synchronize_vertices([]).
+synchronize_vertices([vertex(Descriptor, Label)|Rest]) :-
+	find_owner(Label, File),
+	start_writing(File, Stream),
+	write_vertex(Stream, Descriptor, Label),
+	find_unsynchronized_edges(Label, Edges),
+	write_edges(Stream, Edges),
+	finish_writing(Stream),
+	synchronize_vertices(Rest).
+
+mark_vertices_synchronized([]).
+mark_vertices_synchronized([vertex(_, Label)|Rest]) :-
+	mark_synchronized(Label),
+	mark_vertices_synchronized(Rest).
+
+synchronize_graph :-
+	is_unsynchronized,
+	find_unsynchronized_vertices(Vertices),
+	synchronize_vertices(Vertices),
+	mark_vertices_synchronized(Vertices).

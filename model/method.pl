@@ -88,7 +88,7 @@ parameters_have_same_types([parameter(_, Type, _)|VirtualRest], [Parameter|Exist
 
 method_exists(Class, Name, Parameters) :-
 	find_method_by_name(Class, Name, FoundMethod),
-	get_method_parameters_sorted(FoundMethod, SortedExistingParameters),
+	get_method_parameters_sorted(FoundMethod, SortedExistingParameters), !,
 	parameters_have_same_types(Parameters, SortedExistingParameters).
 
 can_add_method(Class, Modifiers, Return, Name, Parameters) :-
@@ -96,7 +96,7 @@ can_add_method(Class, Modifiers, Return, Name, Parameters) :-
 	is_type(Return),
 	modifiers_are_valid(Modifiers), !,
 	parameters_have_different_names(Parameters), !,
-	method_exists(Class, Name, Parameters).
+	\+ method_exists(Class, Name, Parameters).
 
 % Creation Theorems
 create_modifiers_edges(_, []).
@@ -117,7 +117,6 @@ add_method(Class, Modifiers, Return, Name, Parameters, Method) :-
 	can_add_method(Class, Modifiers, Return, Name, Parameters),
 	generate_qualified_name(Class, Name, Method),
 	create_vertex(method, Method),
-	create_edge(Method, unsynchronized, Method),
 	create_edge(Class, method, Method),
 	create_modifiers_edges(Method, Modifiers),
 	create_edge(Method, return, Return),
