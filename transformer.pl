@@ -12,7 +12,9 @@ testA :-
 	add_method(Employee, ['public'], void, "kill", [
 		parameter([], 'String', person),
 		parameter([], 'boolean', old)
-	], _),
+	], _), !,
+	find_class_by_name("Person", Person),
+	add_attribute(Person, ['public'], 'String', "CPF", _), !,
 	findall(X, edge(X, unsynchronized, X), Unsynchronized),
 	findall(param(N, O), (vertex(parameter, N), edge(N, unsynchronized, N), edge(N, order, O)), UnsyncParams),
 	print_all(UnsyncParams),
@@ -24,8 +26,22 @@ testB :-
 	get_method_parameters(Method, Parameters),
 	get_method_parameters_sorted(Method, SortedParameters),
 	print_all(Parameters),
-	print_all(SortedParameters). 
+	print_all(SortedParameters).
+
+testC :-
+	find_class_by_name("Employee", Employee),
+	add_method(Employee, ['public'], void, "sayHello", [
+		parameter([], 'String', person),
+		parameter([], 'int', times)
+	], Method),
+	add_method(Employee, ['public'], void, "sayHello", [
+		parameter([], 'String', person)
+	%	parameter([], 'int', times)
+	], Method2),
+	print(Method),
+	print(Method2).
 
 start :-
-	load_graph("D:/Workspace/MitrasTest/Graph.pl"),
-	testB.
+	load_graph("C:\\Users\\i867761\\OneDrive - SAP SE\\Desktop\\AGG-Test\\AGG-Test\\graph.pl"),
+	testA,
+	synchronize_graph.
