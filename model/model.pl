@@ -1,12 +1,12 @@
 :- module(model, []).
 
 :- reexport([
-	attribute,
-	class,
-	common,
-	graph,
-	interface,
-	method,
-	modifier,
-	parameter
+  attribute,
+  class,
+  common,
+  graph,
+  interface,
+  method,
+  modifier,
+  parameter
 ]).
