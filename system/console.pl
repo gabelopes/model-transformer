@@ -1,8 +1,13 @@
 :- module(console, [
-  write_all/1
+  write_all/1,
+  write_all/2
 ]).
 
-write_all([]).
-write_all([Term|Rest]) :-
-  writeln(Term),
-  write_all(Rest).
+write_all(Terms) :-
+  write_all(Terms, "\n").
+
+write_all([], _).
+write_all([Term|Rest], Separator) :-
+  write(Term),
+  write(Separator),
+  write_all(Rest, Separator).
