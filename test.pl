@@ -1,6 +1,6 @@
 :- use_module('model/model').
 :- use_module('system/console', [write_all/1]).
-:- use_module('integration/java', [invoke_java/2]).
+:- use_module('integration/java', [invoke_java/2, inject_attribute/5, inject_getter/4, inject_setter/4]).
 
 testA :-
   find_class_by_name("Employee", Employee),
@@ -38,8 +38,15 @@ testC :-
   print(Method),
   print(Method2).
 
+start2 :-
+  invoke_java('/Users/sap/Workspace/Repositories/HelloWorld/out/artifacts/HelloWorld_jar/HelloWorld.jar', ["Jeff"]).
+
+start1 :-
+  load_graph("/Users/sap/Workspace/Repositories/AGG-Test/graph.pl"),
+  testA,
+  synchronize_graph.
+
 start :-
-  invoke_java('/Users/sap/Workspace/Projects/HelloWorld/out/artifacts/HelloWorld_jar/HelloWorld.jar', ["Yo"]).
-  %load_graph("/Users/sap/Workspace/Repositories/AGG-Test/graph.pl"),
-  %testA,
-  %synchronize_graph.
+  inject_attribute("/Users/sap/Downloads/Employee.java", "Employee", ["protected"], "int", "age"),
+  inject_getter("/Users/sap/Downloads/Employee.java", "Employee", ["protected"], "age"),
+  inject_setter("/Users/sap/Downloads/Employee.java", "Employee", ["protected"], "age").
