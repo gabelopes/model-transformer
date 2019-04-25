@@ -1,6 +1,7 @@
 :- use_module('model/model').
 :- use_module('system/console', [write_all/1]).
 :- use_module('integration/java', [invoke_java/2, inject_attribute/5, inject_getter/4, inject_setter/4]).
+:- use_module('cli', [find_option/3]).
 
 testA :-
   find_class_by_name("Employee", Employee),
@@ -46,7 +47,12 @@ start1 :-
   testA,
   synchronize_graph.
 
-start :-
+start3 :-
   inject_attribute("/Users/sap/Downloads/Employee.java", "Employee", ["protected"], "int", "age"),
   inject_getter("/Users/sap/Downloads/Employee.java", "Employee", ["protected"], "age"),
   inject_setter("/Users/sap/Downloads/Employee.java", "Employee", ["protected"], "age").
+
+start :-
+  Options = [c(d), a(b)],
+  find_option(Options, a, Value),
+  write(Value).
