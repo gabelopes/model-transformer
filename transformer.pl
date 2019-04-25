@@ -1,6 +1,12 @@
-:- use_module('system/environment', [get_arguments/1]).
-:- use_module('system/console', [write_all/1]).
+:- module(transformer, [
+  apply_transformation/2
+]).
 
-start :-
-  get_arguments(Arguments),
-  write_all(Arguments).
+:- use_module(cli, [find_option/3]).
+
+specification(add_attribute, [
+  [opt('class'), shortflags(['c']), longflags(['class']), type(atom)],
+  [opt('modifiers'), shortflags(['m']), longflags(['modifiers']), type(atom)]
+]).
+
+apply_transformation(Graph, Transformation, Arguments) :-
