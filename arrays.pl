@@ -1,6 +1,6 @@
 :- module(arrays, [
   has_multiple_occurrences/2,
-  occurrences/3,
+  occurrences/3
 ]).
 
 has_multiple_occurrences(Element, Array) :-
