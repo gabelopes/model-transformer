@@ -26,7 +26,7 @@ get_transformation(Options, Transformation) :-
 start :-
   get_arguments(Arguments),
   get_specification(Specification),
-  opt_parse(Specification, Arguments, Options, Positional),
+  opt_parse(Specification, Arguments, Options, Positional, [allow_empty_flag_spec(false)]),
   get_graph(Options, Graph),
   get_transformation(Options, Transformation),
   apply_transformation(Graph, Transformation, Positional),
