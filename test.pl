@@ -2,6 +2,7 @@
 :- use_module('system/console', [write_all/1]).
 :- use_module('integration/java', [invoke_java/2, inject_attribute/5, inject_getter/4, inject_setter/4]).
 :- use_module('cli', [find_option/3]).
+:- use_module(transformer, [apply_transformation/3]).
 
 testA :-
   find_class_by_name("Employee", Employee),
@@ -52,7 +53,11 @@ start3 :-
   inject_getter("/Users/sap/Downloads/Employee.java", "Employee", ["protected"], "age"),
   inject_setter("/Users/sap/Downloads/Employee.java", "Employee", ["protected"], "age").
 
-start :-
+start4 :-
   Options = [c(d), a(b)],
   find_option(Options, a, Value),
   write(Value).
+
+start :-
+  apply_transformation("tha_graph", "add_attribute", ["class", "[public]", "int", "attr"]),
+  write("ha").
