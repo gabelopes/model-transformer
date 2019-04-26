@@ -191,7 +191,7 @@ mark_vertices_synchronized([vertex(_, Label)|Rest]) :-
   mark_vertices_synchronized(Rest).
 
 synchronize_graph :-
-  \+ is_unsynchronized.
+  is_synchronized.
 synchronize_graph :-
   find_unsynchronized_vertices(Vertices),
   synchronize_vertices(Vertices),
