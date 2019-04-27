@@ -90,8 +90,7 @@ add_attribute(Class, Modifiers, Type, Name, Attribute) :-
   create_edge(Class, attribute, Attribute),
   create_modifiers_edges(Attribute, Modifiers),
   create_edge(Attribute, type, Type),
-  create_edge(Attribute, name, Name),
-  create_accessors(Class, Attribute, Type, Name).
+  create_edge(Attribute, name, Name).
 
 % Metadata Theorems
 mark_getter(Attribute, Method) :-
