@@ -1,7 +1,3 @@
-:- module(cli, [
-  find_option/3
-]).
-
 :- use_module(library(optparse)).
 :- use_module('system/environment', [get_arguments/1]).
 :- use_module(transformer, [apply_transformation/3]).
@@ -24,7 +20,8 @@ get_transformation(Options, Transformation) :-
   find_option(Options, 'transformation', Transformation).
 
 start :-
-  get_arguments(Arguments),
+  get_arguments([_|Argv]),
+  delete(Argv, '-q', Arguments), % DEBUG ONLY
   get_specification(Specification),
   opt_parse(Specification, Arguments, Options, Positional, [allow_empty_flag_spec(false)]),
   get_graph(Options, Graph),
