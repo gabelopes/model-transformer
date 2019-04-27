@@ -5,7 +5,8 @@
   vertex/2,
   create_edge/3,
   create_vertex/2,
-  synchronize_graph/0
+  synchronize_graph/0,
+  find_owner/2
 ]).
 
 :- use_module('../system/io', [writefe/3]).
