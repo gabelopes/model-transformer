@@ -25,38 +25,18 @@ invoke_java(Jar, Arguments, Timeout) :-
     process(PID),
     window(true)
   ]),
-  process_wait(PID, 0, [timeout(Timeout)]).
+  process_wait(PID, _, [timeout(Timeout)]).
 
 invoke_java(Jar, Arguments) :-
   invoke_java(Jar, Arguments, 120).
-
-escape_command(Command, Escaped) :-
-  replace_all(Command, " ", "\\ ", Escaped).
-
-invoke_java_shell(Jar, Arguments) :-
-  get_java_executable_path(Java),
-  join_strings([Java, "-jar", Jar|Arguments], " ", Command),
-  escape_command(Command, Escaped),
-  shell(Escaped, 0).
 
 % Injector Theorems
 get_injector_executable_path(Path) :-
   getenv('INJECTOR_JAR', Path).
 
-wrap_json(JSON, Wrapped) :-
-  atom_concat('"', JSON, Partial),
-  atom_concat(Partial, '"', Wrapped).
-
-escape_json(JSON, Escaped) :-
-  replace_all(JSON, """", "\\""", A),
-  replace_all(A, "\n", "", B),
-  replace_all(B, "\r", "", Escaped).
-
 invoke_injector(File, Injection, JSON) :-
   get_injector_executable_path(Injector),
-  % wrap_json(JSON, Wrapped),
-  escape_json(JSON, Escaped),
-  invoke_java(Injector, ["-s", File, "-l", "JAVA", "-i", Injection, Escaped]).
+  invoke_java(Injector, ["-s", File, "-l", "JAVA", "-i", Injection, JSON]).
 
 inject_attribute(File, Class, Modifiers, Type, Name) :-
   atom_json_dict(JSON, _{ class: Class, modifiers: Modifiers, type: Type, name: Name }, []),
