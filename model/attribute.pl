@@ -4,7 +4,8 @@
   get_attribute_modifiers/2,
   get_attribute_type/2,
   get_attribute_name/2,
-  add_attribute/5
+  add_attribute/5,
+  create_accessors/4
 ]).
 
 :- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
