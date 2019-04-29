@@ -6,7 +6,8 @@
   create_edge/3,
   create_vertex/2,
   synchronize_graph/0,
-  find_owner/2
+  find_owner/2,
+  find_source/2
 ]).
 
 :- use_module('../system/io', [writefe/3]).
@@ -150,6 +151,15 @@ find_owner(Label, File) :-
   Parent \= Label,
   vertex(_, Parent),
   find_owner(Parent, File).
+
+find_source(Label, File) :-
+  edge(Label, source, File).
+find_source(Label, File) :-
+  \+ is_branch_class(Label),
+  edge(Parent, _, Label),
+  Parent \= Label,
+  vertex(_, Parent),
+  find_source(Parent, File).
 
 find_unsynchronized_vertices(Vertices) :-
   findall(vertex(Descriptor, Vertex), (
