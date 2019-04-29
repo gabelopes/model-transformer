@@ -1,8 +1,10 @@
 :- module(text, [
   replace_all/4,
+  atom_replace_all/4,
   join_strings/3,
   join_atoms/3,
-  capitalize/2
+  capitalize/2,
+  atoms_strings/2
 ]).
 
 join_strings(Initial, [], _, Initial).
@@ -27,6 +29,11 @@ replace_all(String, Old, New, Replaced) :-
   split_string(String, Old, "", Parts),
   join_strings(Parts, New, Replaced).
 
+atom_replace_all(Atom, Old, New, Replaced) :-
+  atom_string(Atom, String),
+  replace_all(String, Old, New, ReplacedString),
+  atom_string(Replaced, ReplacedString).
+
 capitalize(Text, Capitalized) :-
   atom(Text),
   atom_chars(Text, [FirstChar|Rest]),
@@ -37,3 +44,8 @@ capitalize(Text, Capitalized) :-
   string_chars(Text, [FirstChar|Rest]),
   upcase_atom(FirstChar, CapitalizedFirstChar),
   string_chars(Capitalized, [CapitalizedFirstChar|Rest]).
+
+atoms_strings([], []).
+atoms_strings([Atom|Atoms], [String|Strings]) :-
+  atom_string(Atom, String),
+  atoms_strings(Atoms, Strings).
