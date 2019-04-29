@@ -9,6 +9,7 @@
 :- use_module(library(process)).
 :- use_module(library(http/json)).
 :- use_module('../system/console', [write_all/1]).
+:- use_module('../representation/text', [join_strings/3, replace_all/4, atoms_strings/2]).
 
 % Java Theorems
 get_java_executable_path(Path) :-
@@ -17,25 +18,45 @@ get_java_executable_path(Path) :-
 
 invoke_java(Jar, Arguments, Timeout) :-
   get_java_executable_path(Java),
-  write_all([Java, "-jar", Jar | Arguments]),
   process_create(Java, ["-jar", Jar|Arguments], [
     stdin(std),
     stdout(std),
     stderr(std),
-    process(PID)
+    process(PID),
+    window(true)
   ]),
-  process_wait(PID, _, [timeout(Timeout)]).
+  process_wait(PID, 0, [timeout(Timeout)]).
 
 invoke_java(Jar, Arguments) :-
   invoke_java(Jar, Arguments, 120).
+
+escape_command(Command, Escaped) :-
+  replace_all(Command, " ", "\\ ", Escaped).
+
+invoke_java_shell(Jar, Arguments) :-
+  get_java_executable_path(Java),
+  join_strings([Java, "-jar", Jar|Arguments], " ", Command),
+  escape_command(Command, Escaped),
+  shell(Escaped, 0).
 
 % Injector Theorems
 get_injector_executable_path(Path) :-
   getenv('INJECTOR_JAR', Path).
 
+wrap_json(JSON, Wrapped) :-
+  atom_concat('"', JSON, Partial),
+  atom_concat(Partial, '"', Wrapped).
+
+escape_json(JSON, Escaped) :-
+  replace_all(JSON, """", "\\""", A),
+  replace_all(A, "\n", "", B),
+  replace_all(B, "\r", "", Escaped).
+
 invoke_injector(File, Injection, JSON) :-
   get_injector_executable_path(Injector),
-  invoke_java(Injector, ["-s", File, "-l", "JAVA", "-i", Injection, JSON]).
+  % wrap_json(JSON, Wrapped),
+  escape_json(JSON, Escaped),
+  invoke_java(Injector, ["-s", File, "-l", "JAVA", "-i", Injection, Escaped]).
 
 inject_attribute(File, Class, Modifiers, Type, Name) :-
   atom_json_dict(JSON, _{ class: Class, modifiers: Modifiers, type: Type, name: Name }, []),
