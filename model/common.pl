@@ -23,10 +23,12 @@ get_package(Label, Package) :-
   edge(Label, package, Package).
 
 % Typed Vertices Theorems
-type(unknown_type).
+type(default_type).
 type(class).
 type(interface).
 type(primitive).
+type(no_type).
+type(array).
 is_type(Type) :-
   vertex(Descriptor, Type),
   type(Descriptor).
