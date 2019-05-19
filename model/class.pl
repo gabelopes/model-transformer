@@ -11,8 +11,9 @@
   get_class_methods/2
 ]).
 
-:- use_module(graph, [edge/3, vertex/2]).
+:- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
 :- use_module(common, [get_name/2, get_package/2, get_modifiers/2]).
+:- use_module('../representation/qualified_name', [generate_qualified_name/3, qualified_name/3]).
 
 % Assertion Theorems
 is_class(Label) :-
@@ -23,10 +24,9 @@ find_class_by_name(Name, Class) :-
   is_class(Class),
   edge(Class, name, Name).
 
-find_class(Text, Class) :-
+find_class(Text, Text) :-
   atom(Text),
-  is_class(Text),
-  Class = Text.
+  is_class(Text).
 find_class(Text, Class) :-
   string(Text),
   find_class_by_name(Text, Class).
@@ -60,3 +60,25 @@ get_class_attributes(Text, Attributes) :-
 get_class_methods(Text, Methods) :-
   find_class(Text, Class),
   findall(Method, edge(Class, method, Method), Methods).
+
+%% Transformation Theorems
+% Verification Theorems
+exists_class(Package, Name) :-
+  edge(Class, name, Name),
+  edge(Class, package, Package),
+  vertex(class, Class).
+
+can_create_class(Package, Name) :-
+  \+ exists_class(Package, Name).
+
+% Creation Theorems
+create_class(QualifiedName, Class) :-
+  qualified_name(QualifiedName, Package, Name),
+  create_class(Package, Name, Class).
+
+create_class(Package, Name, Class) :-
+  can_create_class(Package, Name),
+  generate_qualified_name(Package, Name, Class),
+  create_vertex(class, Class),
+  create_edge(Class, name, Name),
+  create_edge(Class, package, Package).
