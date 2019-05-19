@@ -30,7 +30,7 @@ remove_edge(Head, Label, Tail) :-
 
 create_vertex(Descriptor, Label) :-
   assertz(vertex(Descriptor, Label)),
-  mark_unsynchronized(Label).
+  mark_unsynchronized(Label, add).
 
 find_classes(Classes) :-
   findall(Class, vertex(class, Class), Classes).
@@ -125,7 +125,7 @@ finish_writing(Stream) :-
 % Synchronizing Theorems
 mark_synchronized(Vertex) :-
   vertex(_, Vertex),
-  remove_edge(Vertex, unsynchronized, Vertex).
+  remove_edge(Vertex, unsynchronized(_), Vertex).
 
 is_synchronized(Label) :-
   \+ is_unsynchronized(Label).
@@ -133,15 +133,15 @@ is_synchronized(Label) :-
 is_synchronized :-
   \+ is_unsynchronized.
 
-mark_unsynchronized(Vertex) :-
+mark_unsynchronized(Vertex, Type) :-
   vertex(_, Vertex),
-  create_edge(Vertex, unsynchronized, Vertex).
+  create_edge(Vertex, unsynchronized(Type), Vertex).
 
 is_unsynchronized(Label) :-
-  edge(Label, unsynchronized, Label).
+  edge(Label, unsynchronized(_), Label).
 
 is_unsynchronized :-
-  edge(_, unsynchronized, _).
+  edge(_, unsynchronized(_), _).
 
 find_owner(Label, File) :-
   owner(Label, File).
@@ -163,14 +163,14 @@ find_source(Label, File) :-
 
 find_unsynchronized_vertices(Vertices) :-
   findall(vertex(Descriptor, Vertex), (
-    edge(Vertex, unsynchronized, Vertex),
+    edge(Vertex, unsynchronized(_), Vertex),
     vertex(Descriptor, Vertex)
   ), Vertices).
 
 find_unsynchronized_incoming_edges(Vertex, Edges) :-
   findall(edge(Head, Label, Vertex), (
     edge(Head, Label, Vertex),
-    Label \= unsynchronized,
+    Label \= unsynchronized(_),
     vertex(_, Head),
     is_synchronized(Head)
   ), Edges).
@@ -178,7 +178,7 @@ find_unsynchronized_incoming_edges(Vertex, Edges) :-
 find_unsynchronized_outgoing_edges(Vertex, Edges) :-
   findall(edge(Vertex, Label, Tail), (
     edge(Vertex, Label, Tail),
-    Label \= unsynchronized
+    Label \= unsynchronized(_)
   ), Edges).
 
 find_unsynchronized_edges(Vertex, Edges) :-
