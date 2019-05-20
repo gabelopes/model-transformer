@@ -1,6 +1,7 @@
 :- module(arrays, [
   has_multiple_occurrences/2,
-  occurrences/3
+  occurrences/3,
+  filter/3
 ]).
 
 has_multiple_occurrences(Element, Array) :-
@@ -16,3 +17,10 @@ occurrences(Element, [_|Tail], Count, Occurrences) :-
   occurrences(Element, Tail, NextCount, Occurrences).
 occurrences(Element, Array, Occurrences) :-
   occurrences(Element, Array, 0, Occurrences), !.
+
+filter([], _, []).
+filter([Element|ArrayRest], Predicate, [Element|FilteredRest]) :-
+  call(Predicate, Element),
+  filter(ArrayRest, Predicate, FilteredRest).
+filter([_|ArrayRest], Predicate, FilteredRest) :-
+  filter(ArrayRest, Predicate, FilteredRest).
