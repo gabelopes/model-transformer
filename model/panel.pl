@@ -1,8 +1,12 @@
 :- module(panel, [
+  create_panel/2,
+  create_panel/3,
+  create_panel/4,
+  create_panel/5
 ]).
 
 :- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
-:- use_module(class, [is_class/1]).
+:- use_module(class, [is_class/1, get_class_name/2]).
 
 panel(QualifiedName) -->
   "panel:",
@@ -56,6 +60,13 @@ can_create_panel(Class) :-
   is_panel(Panel).
 
 % Creation Theorems
+create_panel(Class, Panel) :-
+  get_class_name(Class, Name),
+  create_panel(Class, Name, Panel).
+create_panel(Class, Label, Panel) :-
+  create_panel(Class, Label, true, Panel).
+create_panel(Class, Label, Visibility, Panel) :-
+  create_panel(Class, Label, Visibility, 0, Panel).
 create_panel(Class, Label, Visibility, Position, Panel) :-
   can_create_panel(Class),
   get_panel_identifier(Class, PanelQualifiedName),
