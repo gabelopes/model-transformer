@@ -75,7 +75,6 @@ can_create_class(Package, Name) :-
 create_class(QualifiedName, Class) :-
   qualified_name(QualifiedName, Package, Name),
   create_class(Package, Name, Class).
-
 create_class(Package, Name, Class) :-
   can_create_class(Package, Name),
   generate_qualified_name(Package, Name, Class),

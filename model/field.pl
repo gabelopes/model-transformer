@@ -75,3 +75,12 @@ create_field(Attribute, Label, Visibility, Position, Field) :-
   create_edge(Field, label, Label),
   create_edge(Field, visible, Visibility),
   create_edge(Field, position, Position).
+
+% Replacement Theorems
+show_field(Attribute) :-
+
+
+show_field(Field) :-
+
+
+remove_field()
