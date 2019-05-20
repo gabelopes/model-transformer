@@ -10,6 +10,7 @@
 ]).
 
 :- use_module(rewriter/rewriter, [rewrite_file/3]).
+:- use_module('../arrays', [filter/3]).
 
 :- multifile edge/3.
 :- multifile vertex/2.
@@ -30,14 +31,13 @@ remove_edge(Head, Label, Tail) :-
 create_vertex(Descriptor, Label) :-
   assertz(vertex(Descriptor, Label)).
 
-find_root_vertices(Vertices) :-
-  findall(vertex(Descriptor, Label), is_root(Descriptor, Label), Vertices).
+find_root_vertices(Roots) :-
+  findall(vertex(Descriptor, Label), vertex(Descriptor, Label), Vertices),
+  filter(Vertices, graph:is_root, Roots).
 
-is_root(class, Class) :-
-  vertex(class, Class), !,
+is_root(vertex(class, Class)) :-
   edge(Class, Label, _),
-  Label \= 'name',
-  Label \= 'package'.
+  \+ member(Label, [name, package]).
 
 retract_graph :-
   retractall(edge(_, _, _)),
