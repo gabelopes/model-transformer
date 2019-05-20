@@ -4,6 +4,7 @@
 
 :- use_module('../graph', [edge/3, vertex/2]).
 :- use_module('../../system/io', [writefe/3]).
+:- use_module('../../arrays', [filter/3]).
 
 :- dynamic visited/1.
 
@@ -18,25 +19,25 @@ retract_visits :-
   retractall(visited(_)).
 
 % Graph Walking Theorems
-is_property_edge(Head, Label, Tail) :-
-  edge(Head, Label, Tail), !,
+is_property_edge(edge(_, _, Tail)) :-
   \+ vertex(_, Tail).
+
+find_outgoing_property_edges(Head, PropertyEdges) :-
+  find_outgoing_edges(Head, Edges),
+  filter(Edges, rewriter:is_property_edge, PropertyEdges).
 
 find_outgoing_edges(Head, Edges) :-
   findall(edge(Head, Label, Tail), edge(Head, Label, Tail), Edges).
 
-find_outgoing_property_edges(Head, Edges) :-
-  findall(edge(Head, Label, Tail), is_property_edge(Head, Label, Tail), Edges).
+are_vertices_equal(vertex(Descriptor, Label), vertex(Descriptor, Label)).
 
 collect_facts(_, [], _, _, []).
 collect_facts(FileRoot, [Fact|Rest], FileRoots, OtherFilesRoots, Facts) :-
   collect_facts(FileRoot, Fact, FileRoots, OtherFilesRoots, PartialFacts),
   collect_facts(FileRoot, Rest, FileRoots, OtherFilesRoots, OtherFacts),
   append(PartialFacts, OtherFacts, Facts).
-
 collect_facts(vertex(FileRootDescriptor, FileRootLabel), vertex(Descriptor, Label), FileRoots, _, []) :-
-  FileRootDescriptor \= Descriptor,
-  FileRootLabel \= Label,
+  \+ are_vertices_equal(vertex(FileRootDescriptor, FileRootLabel), vertex(Descriptor, Label)),
   member(vertex(Descriptor, Label), FileRoots).
 collect_facts(FileRoot, vertex(Descriptor, Label), FileRoots, OtherFilesRoots, [vertex(Descriptor, Label)|Rest]) :-
   \+ visited(vertex(Descriptor, Label)),
