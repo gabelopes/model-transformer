@@ -21,6 +21,7 @@
 
 :- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2, replace_edge/2, replace_vertex/2, remove_edge/3, remove_vertex/2]).
 :- use_module(class, [is_class/1, get_class_name/2]).
+:- use_module('../representation/qualified_name', [generate_qualified_name/2]).
 
 panel(QualifiedName) -->
   "panel:",
@@ -54,7 +55,7 @@ get_class_for_panel(Panel, Class) :-
 get_panel_identifier(Class, Panel) :-
   atom_concat('panel:', Class, Panel).
 
-get_panel_label(Panel, Label),
+get_panel_label(Panel, Label) :-
   is_panel(Panel), !,
   edge(Panel, label, Label).
 
@@ -70,8 +71,7 @@ get_panel_position(Panel, Position) :-
 % Validation Theorems
 can_create_panel(Class) :-
   is_class(Class),
-  \+ edge(Class, panel, Panel),
-  is_panel(Panel).
+  \+ edge(Class, panel, _).
 
 % Creation Theorems
 create_panel(Class, Panel) :-
@@ -83,9 +83,10 @@ create_panel(Class, Label, Visibility, Panel) :-
   create_panel(Class, Label, Visibility, 0, Panel).
 create_panel(Class, Label, Visibility, Position, Panel) :-
   can_create_panel(Class),
-  get_panel_identifier(Class, PanelQualifiedName),
-  generate_qualified_name('', PanelQualifiedName, Panel),
+  get_panel_identifier(Class, PanelIdentifier),
+  generate_qualified_name([PanelIdentifier], Panel),
   create_vertex(panel, Panel),
+  create_edge(Class, panel, Panel),
   create_edge(Panel, label, Label),
   create_edge(Panel, visible, Visibility),
   create_edge(Panel, position, Position).

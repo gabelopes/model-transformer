@@ -1,8 +1,8 @@
 :- module(field, [
-  create_field/2,
   create_field/3,
   create_field/4,
   create_field/5,
+  create_field/6,
   set_field_property/4,
   set_field_property/3,
   show_field/2,
@@ -21,6 +21,8 @@
 
 :- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2, replace_edge/2, replace_vertex/2, remove_edge/3, remove_vertex/2]).
 :- use_module(attribute, [is_attribute/1, get_attribute_name/2]).
+:- use_module('../representation/qualified_name', [generate_qualified_name/2]).
+:- use_module(panel, [is_panel/1]).
 
 field(QualifiedName) -->
   "field:",
@@ -50,7 +52,7 @@ get_attribute_for_field(Field, Attribute) :-
   get_field_identifier(Attribute, Field),
   is_attribute(Attribute).
 
-get_class_field(Class, Attribute, Field) :-
+get_class_field(Class, Name, Field) :-
   find_attribute_by_name(Class, Name, Attribute),
   get_field_identifier(Attribute, Field).
 
@@ -62,7 +64,7 @@ get_field_property(Field, Property, Value) :-
   is_field(Field), !,
   edge(Field, Property, Value).
 
-get_field_label(Field, Label),
+get_field_label(Field, Label) :-
   get_field_property(Field, label, Label).
 
 get_field_visibility(Field, Visibility) :-
@@ -73,24 +75,26 @@ get_field_position(Field, Position) :-
 
 %% Transformation Theorems
 % Validation Theorems
-can_create_field(Attribute) :-
+can_create_field(Panel, Attribute) :-
+  is_panel(Panel),
   is_attribute(Attribute),
-  \+ edge(Attribute, field, Field),
-  is_field(Field).
+  \+ edge(Attribute, field, _).
 
 % Creation Theorems
-create_field(Attribute, Field) :-
+create_field(Panel, Attribute, Field) :-
   get_attribute_name(Attribute, Name),
-  create_field(Attribute, Name, Field).
-create_field(Attribute, Label, Field) :-
-  create_field(Attribute, Label, true, Field).
-create_field(Attribute, Label, Visibility, Field) :-
-  create_field(Attribute, Label, Visibility, 0, Field).
-create_field(Attribute, Label, Visibility, Position, Field) :-
-  can_create_field(Attribute),
-  get_field_identifier(Attribute, FieldQualifiedName),
-  generate_qualified_name('', FieldQualifiedName, Field),
+  create_field(Panel, Attribute, Name, Field).
+create_field(Panel, Attribute, Label, Field) :-
+  create_field(Panel, Attribute, Label, true, Field).
+create_field(Panel, Attribute, Label, Visibility, Field) :-
+  create_field(Panel, Attribute, Label, Visibility, 0, Field).
+create_field(Panel, Attribute, Label, Visibility, Position, Field) :-
+  can_create_field(Panel, Attribute),
+  get_field_identifier(Attribute, FieldIdentifier),
+  generate_qualified_name([FieldIdentifier], Field),
   create_vertex(field, Field),
+  create_edge(Panel, field, Field),
+  create_edge(Attribute, field, Field),
   create_edge(Field, label, Label),
   create_edge(Field, visible, Visibility),
   create_edge(Field, position, Position).

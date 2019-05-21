@@ -13,7 +13,7 @@
 
 :- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
 :- use_module(common, [get_name/2, get_package/2, get_modifiers/2]).
-:- use_module('../representation/qualified_name', [generate_qualified_name/3, qualified_name/3]).
+:- use_module('../representation/qualified_name', [generate_qualified_name/2, qualified_name/3]).
 
 % Assertion Theorems
 is_class(Label) :-
@@ -77,7 +77,7 @@ create_class(QualifiedName, Class) :-
   create_class(Package, Name, Class).
 create_class(Package, Name, Class) :-
   can_create_class(Package, Name),
-  generate_qualified_name(Package, Name, Class),
+  generate_qualified_name([Package, Name], Class),
   create_vertex(class, Class),
   create_edge(Class, name, Name),
   create_edge(Class, package, Package).

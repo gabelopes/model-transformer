@@ -1,4 +1,5 @@
 :- module(attribute, [
+  is_attribute/1,
   find_attribute_by_name/3,
   get_attribute_class/2,
   get_attribute_modifiers/2,
@@ -86,7 +87,7 @@ create_accessors(Class, Attribute, Type, Name) :-
 
 add_attribute(Class, Modifiers, Type, Name, Attribute) :-
   can_add_attribute(Class, Modifiers, Type, Name),
-  generate_qualified_name(Class, Name, Attribute),
+  generate_qualified_name([Class, Name], Attribute),
   create_vertex(attribute, Attribute),
   create_edge(Class, attribute, Attribute),
   create_modifiers_edges(Attribute, Modifiers),

@@ -115,7 +115,7 @@ create_parameters(Method, Parameters) :-
 
 add_method(Class, Modifiers, Return, Name, Parameters, Method) :-
   can_add_method(Class, Modifiers, Return, Name, Parameters),
-  generate_qualified_name(Class, Name, Method),
+  generate_qualified_name([Class, Name], Method),
   create_vertex(method, Method),
   create_edge(Class, method, Method),
   create_modifiers_edges(Method, Modifiers),

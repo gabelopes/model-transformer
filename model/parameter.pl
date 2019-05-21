@@ -13,7 +13,7 @@
 :- use_module(common, [is_type/1, get_name/2, get_type/2, get_modifiers/2]).
 :- use_module(method, [is_method/1, find_method/3]).
 :- use_module(modifier, [is_modifier/1]).
-:- use_module('../representation/qualified_name', [generate_qualified_name/3]).
+:- use_module('../representation/qualified_name', [generate_qualified_name/2]).
 
 % Assertion Theorems
 is_parameter(Parameter) :-
@@ -80,7 +80,7 @@ create_modifiers_edges(Parameter, [Modifier|Rest]) :-
 
 add_parameter(Method, Modifiers, Type, Name, Order, Parameter) :-
   can_add_parameter(Method, Modifiers, Type),
-  generate_qualified_name(Method, Name, Parameter),
+  generate_qualified_name([Method, Name], Parameter),
   create_vertex(parameter, Parameter),
   create_edge(Method, parameter, Parameter),
   create_modifiers_edges(Parameter, Modifiers),

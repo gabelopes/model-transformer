@@ -1,5 +1,5 @@
 :- module(qualified_name, [
-  generate_qualified_name/3,
+  generate_qualified_name/2,
   qualified_name/3
 ]).
 
@@ -13,16 +13,16 @@ generate_numbered_name(Name, 1, Name) :- !.
 generate_numbered_name(Name, Number, NumberedName) :-
   atom_concat(Name, Number, NumberedName).
 
-generate_qualified_name(Parent, Name, Number, QualifiedName) :-
-  generate_numbered_name(Name, Number, NumberedName),
-  join_atoms([Parent, NumberedName], '.', QualifiedName),
+generate_qualified_name(Name, Number, QualifiedName) :-
+  generate_numbered_name(Name, Number, QualifiedName),
   is_qualified_name_available(QualifiedName).
-generate_qualified_name(Parent, Name, Number, QualifiedName) :-
+generate_qualified_name(Name, Number, QualifiedName) :-
   NextNumber is Number + 1,
-  generate_qualified_name(Parent, Name, NextNumber, QualifiedName).
+  generate_qualified_name(Name, NextNumber, QualifiedName).
 
-generate_qualified_name(Parent, Name, QualifiedName) :-
-  generate_qualified_name(Parent, Name, 1, QualifiedName), !.
+generate_qualified_name(Parts, QualifiedName) :-
+  join_atoms(Parts, '.', JoinedParts),
+  generate_qualified_name(JoinedParts, 1, QualifiedName), !.
 
 qualified_name(QualifiedName, Package, Identifier) :-
   split_string(QualifiedName, ".", "", Parts),
