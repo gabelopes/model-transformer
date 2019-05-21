@@ -4,7 +4,11 @@
   edge/3,
   vertex/2,
   create_edge/3,
+  replace_edge/2,
+  remove_edge/3,
   create_vertex/2,
+  replace_vertex/2,
+  remove_vertex/2,
   rewrite_graph/0,
   find_source/3
 ]).
@@ -25,11 +29,24 @@
 create_edge(Head, Label, Tail) :-
   assertz(edge(Head, Label, Tail)).
 
+replace_edge(edge(Head, Label, Tail), edge(ForHead, ForLabel, ForTail)) :-
+  remove_edge(Head, Label, Tail),
+  create_edge(ForHead, ForLabel, ForTail).
+
 remove_edge(Head, Label, Tail) :-
   retract(edge(Head, Label, Tail)).
+remove_edge(_, _, _).
 
 create_vertex(Descriptor, Label) :-
   assertz(vertex(Descriptor, Label)).
+
+replace_vertex(vertex(Descriptor, Label), vertex(ForDescriptor, ForLabel)) :-
+  remove_vertex(Descriptor, Label),
+  create_vertex(ForDescriptor, ForLabel).
+
+remove_vertex(Descriptor, Label) :-
+  retract(vertex(Descriptor, Label)).
+remove_vertex(_, _).
 
 find_root_vertices(Roots) :-
   findall(vertex(Descriptor, Label), vertex(Descriptor, Label), Vertices),

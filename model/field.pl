@@ -2,10 +2,24 @@
   create_field/2,
   create_field/3,
   create_field/4,
-  create_field/5
+  create_field/5,
+  set_field_property/4,
+  set_field_property/3,
+  show_field/2,
+  show_field/1,
+  hide_field/2,
+  hide_field/1,
+  set_field_visible/3,
+  set_field_visible/2,
+  set_field_label/3,
+  set_field_label/2,
+  set_field_position/3,
+  set_field_position/2,
+  remove_field/2,
+  remove_field/1
 ]).
 
-:- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
+:- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2, replace_edge/2, replace_vertex/2, remove_edge/3, remove_vertex/2]).
 :- use_module(attribute, [is_attribute/1, get_attribute_name/2]).
 
 field(QualifiedName) -->
@@ -36,21 +50,26 @@ get_attribute_for_field(Field, Attribute) :-
   get_field_identifier(Attribute, Field),
   is_attribute(Attribute).
 
+get_class_field(Class, Attribute, Field) :-
+  find_attribute_by_name(Class, Name, Attribute),
+  get_field_identifier(Attribute, Field).
+
 % Property Theorems
 get_field_identifier(Attribute, Field) :-
   atom_concat('field:', Attribute, Field).
 
-get_field_label(Field, Label),
+get_field_property(Field, Property, Value) :-
   is_field(Field), !,
-  edge(Field, label, Label).
+  edge(Field, Property, Value).
+
+get_field_label(Field, Label),
+  get_field_property(Field, label, Label).
 
 get_field_visibility(Field, Visibility) :-
-  is_field(Field), !,
-  edge(Field, visible, Visibility).
+  get_field_property(Field, visible, Visibility).
 
 get_field_position(Field, Position) :-
-  is_field(Field), !,
-  edge(Field, position, Position).
+  get_field_property(Field, position, Position).
 
 %% Transformation Theorems
 % Validation Theorems
@@ -77,10 +96,45 @@ create_field(Attribute, Label, Visibility, Position, Field) :-
   create_edge(Field, position, Position).
 
 % Replacement Theorems
-show_field(Attribute) :-
+set_field_property(Class, Attribute, Property, Value) :-
+  get_class_field(Class, Attribute, Field),
+  set_field_property(Field, Property, Value).
+set_field_property(Field, Property, Value) :-
+  is_field(Field),
+  edge(Field, Property, CurrentValue),
+  replace_edge(edge(Field, Property, CurrentValue), edge(Field, Property, Value)).
 
-
+show_field(Class, Attribute) :-
+  set_field_visible(Class, Attribute, true).
 show_field(Field) :-
+  set_field_visible(Field, true).
 
+hide_field(Class, Attribute) :-
+  set_field_visible(Class, Attribute, false).
+hide_field(Field) :-
+  set_field_visible(Field, false).
 
-remove_field()
+set_field_visible(Class, Attribute, Visibility) :-
+  set_field_property(Class, Attribute, visible, Visibility).
+set_field_visible(Field, Visibility) :-
+  set_field_property(Field, visible, Visibility).
+
+set_field_label(Class, Attribute, Label) :-
+  set_field_property(Class, Attribute, label, Label).
+set_field_label(Field, Label) :-
+  set_field_property(Field, label, Label).
+
+set_field_position(Class, Attribute, Position) :-
+  set_field_property(Class, Attribute, position, Position).
+set_field_position(Field, Position) :-
+  set_field_property(Field, position, Position).
+
+% Removal Theorems
+remove_field(Class, Attribute) :-
+  get_class_field(Class, Attribute, Field),
+  remove_field(Field).
+remove_field(Field) :-
+  remove_vertex(field, Field),
+  remove_edge(Field, label, _),
+  remove_edge(Field, visible, _),
+  remove_edge(Field, position, _).
