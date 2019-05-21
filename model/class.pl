@@ -8,12 +8,16 @@
   get_class_parent/2,
   get_class_interfaces/2,
   get_class_attributes/2,
-  get_class_methods/2
+  get_class_methods/2,
+  create_class/5,
+  create_class/6
 ]).
 
 :- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
 :- use_module(common, [get_name/2, get_package/2, get_modifiers/2]).
 :- use_module('../representation/qualified_name', [generate_qualified_name/2, qualified_name/3]).
+:- use_module(interface, [is_interface/1]).
+:- use_module(modifier, [is_modifier/1]).
 
 % Assertion Theorems
 is_class(Label) :-
@@ -63,20 +67,33 @@ get_class_methods(Text, Methods) :-
 
 %% Transformation Theorems
 % Verification Theorems
-exists_class(Package, Name) :-
+class_exists(Package, Name) :-
   edge(Class, name, Name),
   edge(Class, package, Package),
   vertex(class, Class).
 
-can_create_class(Package, Name) :-
-  \+ exists_class(Package, Name).
+modifiers_are_valid([]).
+modifiers_are_valid([Modifier|Rest]) :-
+  is_modifier(Modifier),
+  modifiers_are_valid(Rest).
+
+interfaces_are_valid([]).
+interfaces_are_valid([Interface|Rest]) :-
+  is_interface(Interface),
+  interfaces_are_valid(Rest).
+
+can_create_class(Package, Modifiers, Name, Parent, Interfaces) :-
+  \+ class_exists(Package, Name),
+  modifiers_are_valid(Modifiers),
+  is_class(Parent),
+  interfaces_are_valid(Interfaces).
 
 % Creation Theorems
-create_class(QualifiedName, Class) :-
+create_class(Modifiers, Parent, Interfaces, QualifiedName, Class) :-
   qualified_name(QualifiedName, Package, Name),
-  create_class(Package, Name, Class).
-create_class(Package, Name, Class) :-
-  can_create_class(Package, Name),
+  create_class(Package, Modifiers, Name, Parent, Interfaces, Class).
+create_class(Package, Modifiers, Name, Parent, Interfaces, Class) :-
+  can_create_class(Package, Modifiers, Name, Parent, Interfaces),
   generate_qualified_name([Package, Name], Class),
   create_vertex(class, Class),
   create_edge(Class, name, Name),
