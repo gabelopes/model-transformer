@@ -5,4 +5,5 @@
 :- use_module(graph, [vertex/2]).
 
 is_modifier(Modifier) :-
+  nonvar(Modifier),
   vertex(modifier, Modifier).

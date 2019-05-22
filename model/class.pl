@@ -21,12 +21,13 @@
 
 % Assertion Theorems
 is_class(Label) :-
+  nonvar(Label),
   vertex(class, Label).
 
 % Search Theorems
 find_class_by_name(Name, Class) :-
-  is_class(Class),
-  edge(Class, name, Name).
+  edge(Class, name, Name),
+  is_class(Class).
 
 find_class(Text, Text) :-
   atom(Text),

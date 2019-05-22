@@ -21,6 +21,7 @@
 
 % Assertion Theorems
 is_method(Method) :-
+  nonvar(Method),
   vertex(method, Method),
   edge(_, method, Method).
 

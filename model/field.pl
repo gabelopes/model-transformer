@@ -36,6 +36,7 @@ qualified_name([Character|Rest]) -->
 
 % Assertion Theorems
 is_field(Field) :-
+  nonvar(Field),
   vertex(field, Field),
   string_codes(Field, Stream),
   phrase(field(_), Stream).

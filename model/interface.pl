@@ -14,17 +14,17 @@
 
 % Assertion Theorems
 is_interface(Label) :-
+  nonvar(Label),
   vertex(interface, Label).
 
 % Search Theorems
 find_interface_by_name(Name, Interface) :-
-  is_interface(Interface),
-  edge(Interface, name, Name).
+  edge(Interface, name, Name),
+  is_interface(Interface).
 
-find_interface(Text, Interface) :-
+find_interface(Text, Text) :-
   atom(Text),
-  is_interface(Text),
-  Interface = Text.
+  is_interface(Text).
 find_interface(Text, Interface) :-
   string(Text),
   find_interface_by_name(Text, Interface).

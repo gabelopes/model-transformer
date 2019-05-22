@@ -36,6 +36,7 @@ qualified_name([Character|Rest]) -->
 
 % Assertion Theorems
 is_panel(Panel) :-
+  nonvar(Panel),
   vertex(panel, Panel),
   string_codes(Panel, Stream),
   phrase(panel(_), Stream).

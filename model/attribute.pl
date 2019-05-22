@@ -19,6 +19,7 @@
 
 % Assertion Theorems
 is_attribute(Attribute) :-
+  nonvar(Attribute),
   vertex(attribute, Attribute),
   edge(_, attribute, Attribute).
 

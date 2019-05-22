@@ -17,6 +17,7 @@
 
 % Assertion Theorems
 is_parameter(Parameter) :-
+  nonvar(Parameter),
   vertex(parameter, Parameter),
   edge(_, parameter, Parameter).
 
