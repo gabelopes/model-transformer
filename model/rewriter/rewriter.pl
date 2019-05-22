@@ -3,7 +3,6 @@
 ]).
 
 :- use_module('../graph', [edge/3, vertex/2]).
-:- use_module('../../system/io', [writefe/3]).
 :- use_module('../../arrays', [filter/3]).
 :- use_module(black_box).
 
@@ -78,17 +77,22 @@ collect_knowledge_base(File, FileRoots, Roots, KnowledgeBase) :-
   collect_orphan_vertices(File, Orphans),
   append(Facts, Orphans, KnowledgeBase).
 
-% Writing Theorems
-write_fact(Stream, vertex(Descriptor, Label)) :-
-  writefe(Stream, "vertex(~w, ~w).", [Descriptor, Label]),
-  nl(Stream).
-write_fact(Stream, edge(Head, Label, Tail)) :-
-  writefe(Stream, "edge(~w, ~w, ~w).", [Head, Label, Tail]),
-  nl(Stream).
+% Comparative Theorems
+fact_to_string(Fact, String) :-
+  with_output_to(string(String), portray_clause(Fact)).
 
+compare_facts(Delta, FactA, FactB) :-
+  fact_to_string(FactA, StringA),
+  fact_to_string(FactB, StringB),
+  compare(Delta, StringA, StringB).
+
+sort_knowledge_base(KnowledgeBase, Sorted) :-
+  predsort(compare_facts, KnowledgeBase, Sorted).
+
+% Writing Theorems
 write_knowledge_base(_, []).
 write_knowledge_base(Stream, [Fact|Rest]) :-
-  write_fact(Stream, Fact),
+  portray_clause(Stream, Fact),
   write_knowledge_base(Stream, Rest).
 
 start_writing(File, Stream) :-
@@ -100,7 +104,8 @@ finish_writing(Stream) :-
 % Rewriting Theorems
 rewrite_file(File, FileRoots, Roots) :-
   collect_knowledge_base(File, FileRoots, Roots, KnowledgeBase),
+  sort_knowledge_base(KnowledgeBase, SortedKnowledgeBase),
   start_writing(File, Stream),
-  write_knowledge_base(Stream, KnowledgeBase),
+  write_knowledge_base(Stream, SortedKnowledgeBase),
   finish_writing(Stream),
   retract_visits.
