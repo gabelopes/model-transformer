@@ -5,6 +5,7 @@
 :- use_module('../graph', [edge/3, vertex/2]).
 :- use_module('../../system/io', [writefe/3]).
 :- use_module('../../arrays', [filter/3]).
+:- use_module(black_box).
 
 :- dynamic visited/1.
 
@@ -66,6 +67,17 @@ collect_all_facts([FileRoot|Rest], FileRoots, OtherFilesRoots, Facts) :-
   collect_all_facts(Rest, FileRoots, OtherFilesRoots, OtherFacts),
   append(PartialFacts, OtherFacts, Facts).
 
+collect_orphan_vertices(File, Vertices) :-
+  black_box:load(File),
+  black_box:get_orphan_vertices(Vertices),
+  black_box:unload.
+
+collect_knowledge_base(File, FileRoots, Roots, KnowledgeBase) :-
+  subtract(Roots, FileRoots, OtherFilesRoots),
+  collect_all_facts(FileRoots, FileRoots, OtherFilesRoots, Facts),
+  collect_orphan_vertices(File, Orphans),
+  append(Facts, Orphans, KnowledgeBase).
+
 % Writing Theorems
 write_fact(Stream, vertex(Descriptor, Label)) :-
   writefe(Stream, "vertex(~w, ~w).", [Descriptor, Label]),
@@ -74,10 +86,10 @@ write_fact(Stream, edge(Head, Label, Tail)) :-
   writefe(Stream, "edge(~w, ~w, ~w).", [Head, Label, Tail]),
   nl(Stream).
 
-write_facts(_, []).
-write_facts(Stream, [Fact|Rest]) :-
+write_knowledge_base(_, []).
+write_knowledge_base(Stream, [Fact|Rest]) :-
   write_fact(Stream, Fact),
-  write_facts(Stream, Rest).
+  write_knowledge_base(Stream, Rest).
 
 start_writing(File, Stream) :-
   open(File, write, Stream).
@@ -87,9 +99,8 @@ finish_writing(Stream) :-
 
 % Rewriting Theorems
 rewrite_file(File, FileRoots, Roots) :-
-  subtract(Roots, FileRoots, OtherFilesRoots),
-  collect_all_facts(FileRoots, FileRoots, OtherFilesRoots, Facts),
+  collect_knowledge_base(File, FileRoots, Roots, KnowledgeBase),
   start_writing(File, Stream),
-  write_facts(Stream, Facts),
+  write_knowledge_base(Stream, KnowledgeBase),
   finish_writing(Stream),
   retract_visits.

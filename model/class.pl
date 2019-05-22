@@ -77,6 +77,11 @@ modifiers_are_valid([Modifier|Rest]) :-
   is_modifier(Modifier),
   modifiers_are_valid(Rest).
 
+parent_is_valid(Parent) :-
+  var(Parent).
+parent_is_valid(Parent) :-
+  is_class(Parent).
+
 interfaces_are_valid([]).
 interfaces_are_valid([Interface|Rest]) :-
   is_interface(Interface),
@@ -85,16 +90,33 @@ interfaces_are_valid([Interface|Rest]) :-
 can_create_class(Package, Modifiers, Name, Parent, Interfaces) :-
   \+ class_exists(Package, Name),
   modifiers_are_valid(Modifiers),
-  is_class(Parent),
+  parent_is_valid(Parent),
   interfaces_are_valid(Interfaces).
 
 % Creation Theorems
-create_class(Modifiers, Parent, Interfaces, QualifiedName, Class) :-
-  qualified_name(QualifiedName, Package, Name),
-  create_class(Package, Modifiers, Name, Parent, Interfaces, Class).
+create_modifiers_edges(_, []).
+create_modifiers_edges(Class, [Modifier|Rest]) :-
+  create_edge(Class, modifier, Modifier),
+  create_modifiers_edges(Class, Rest).
+
+create_parent_edge(_, Parent) :-
+  var(Parent).
+create_parent_edge(Class, Parent) :-
+  create_edge(Class, parent, Parent).
+
+create_interfaces_edges(_, []).
+create_interfaces_edges(Class, [Interface|Rest]) :-
+  create_edge(Class, interface, Interface),
+  create_interfaces_edges(Class, Rest).
+
+create_class(Package, Modifiers, Name, Interfaces, Class) :-
+  create_class(Package, Modifiers, Name, _, Interfaces, Class).
 create_class(Package, Modifiers, Name, Parent, Interfaces, Class) :-
   can_create_class(Package, Modifiers, Name, Parent, Interfaces),
   generate_qualified_name([Package, Name], Class),
   create_vertex(class, Class),
+  create_modifiers_edges(Class, Modifiers),
   create_edge(Class, name, Name),
-  create_edge(Class, package, Package).
+  create_edge(Class, package, Package),
+  create_parent_edge(Class, Parent),
+  create_interfaces_edges(Class, Interfaces).

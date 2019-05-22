@@ -1,7 +1,8 @@
 :- module(arrays, [
   has_multiple_occurrences/2,
   occurrences/3,
-  filter/3
+  filter/3,
+  parse_array/2
 ]).
 
 has_multiple_occurrences(Element, Array) :-
@@ -24,3 +25,36 @@ filter([Element|ArrayRest], Predicate, [Element|FilteredRest]) :-
   filter(ArrayRest, Predicate, FilteredRest).
 filter([_|ArrayRest], Predicate, FilteredRest) :-
   filter(ArrayRest, Predicate, FilteredRest).
+
+%% Array Parsing DCG
+array([]) --> space.
+array(Content) --> space, left_bracket, space, array_content(Content), space, right_bracket, space.
+
+array_content([]) --> space.
+array_content(Content) --> elements(Content).
+
+elements([Element]) --> element(Element).
+elements([Element|Rest]) --> element(Element), space, comma, space, elements(Rest).
+
+element(Identifier) --> double_quote, identifier(Identifier), double_quote.
+
+identifier('') --> [].
+identifier(Identifier) --> identifier_content(Content), { atom_codes(Identifier, Content), ! }.
+
+identifier_content([]), """" --> double_quote.
+identifier_content([34|Rest]) --> "\\""", identifier_content(Rest).
+identifier_content([Code|Rest]) --> [Code], identifier_content(Rest).
+
+space --> [].
+space --> " ", space.
+
+left_bracket --> "[".
+right_bracket --> "]".
+
+comma --> ",".
+
+double_quote --> """".
+
+parse_array(Text, Array) :-
+  string_codes(Text, Stream),
+  phrase(array(Array), Stream).

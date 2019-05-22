@@ -1,4 +1,5 @@
 :- module(interface, [
+  is_interface/1,
   find_interface_by_name/2,
   find_interface/2,
   get_interface_modifiers/2,

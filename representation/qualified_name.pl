@@ -32,4 +32,4 @@ qualified_name(QualifiedName, Package, Identifier) :-
 split_qualified_name([], [], "").
 split_qualified_name([Part], [], Part).
 split_qualified_name([PartA|Rest], [PartA|Partial], Name) :-
-  separate_qualified_name(Rest, Partial, Name).
+  split_qualified_name(Rest, Partial, Name).

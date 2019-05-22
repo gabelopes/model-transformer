@@ -1,4 +1,5 @@
 :- module(panel, [
+  is_panel/1,
   create_panel/2,
   create_panel/3,
   create_panel/4,
