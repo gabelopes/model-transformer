@@ -4,6 +4,8 @@
   create_panel/3,
   create_panel/4,
   create_panel/5,
+  get_panel_for_class/2,
+  get_class_for_panel/2,
   set_panel_property/3,
   show_panel/1,
   hide_panel/1,

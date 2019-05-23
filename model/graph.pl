@@ -9,19 +9,24 @@
   create_vertex/2,
   replace_vertex/2,
   remove_vertex/2,
-  rewrite_graph/0,
-  find_source/3
+  create_root/2,
+  is_root/1,
+  create_use/1,
+  create_use_for_name/2,
+  find_source/2,
+  rewrite_graph/0
 ]).
 
-:- use_module(rewriter/rewriter, [rewrite_file/3]).
+:- use_module(rewriter/rewriter, [rewrite_file/3, rewrite_linking_file/2]).
 :- use_module('../arrays', [filter/3]).
+:- use_module('../representation/qualified_name', [generate_file_name/3]).
 
 :- multifile edge/3.
 :- multifile vertex/2.
 
 :- dynamic loaded/1.
 :- dynamic use/1.
-:- dynamic root/3.
+:- dynamic root/2.
 :- dynamic edge/3.
 :- dynamic vertex/2.
 
@@ -48,26 +53,18 @@ remove_vertex(Descriptor, Label) :-
   retract(vertex(Descriptor, Label)).
 remove_vertex(_, _).
 
-find_root_vertices(Roots) :-
-  findall(vertex(Descriptor, Label), vertex(Descriptor, Label), Vertices),
-  filter(Vertices, graph:is_root, Roots).
-
-is_root(vertex(class, Class)) :-
-  edge(Class, Label, _),
-  \+ member(Label, [name, package]).
-
 retract_graph :-
   retractall(edge(_, _, _)),
   retractall(vertex(_, _)).
 
 % Links Theorems
-create_root(Descriptor, Label, File) :-
-  assertz(root(Descriptor, Label, File)).
-create_root(_, _, _).
+create_root(Term, File) :-
+  assertz(root(Term, File)).
+create_root(_, _).
 
 create_roots([], _).
-create_roots([vertex(Descriptor, Label)|Rest], File) :-
-  create_root(Descriptor, Label, File),
+create_roots([Term|Rest], File) :-
+  create_root(Term, File),
   create_roots(Rest, File).
 
 create_roots([]).
@@ -78,10 +75,27 @@ create_roots([Use|Rest]) :-
   retract_graph,
   create_roots(Rest).
 
+find_root_vertices(Roots) :-
+  findall(vertex(Descriptor, Label), vertex(Descriptor, Label), Vertices),
+  filter(Vertices, graph:is_root, Roots).
+
+is_root(vertex(class, Class)) :-
+  edge(Class, Label, _),
+  \+ member(Label, [name, package]).
+
 retract_roots :-
-  retractall(root(_, _, _)).
+  retractall(root(_, _)).
 
 % Uses Theorems
+create_use(File) :-
+  assertz(use(File)).
+
+create_use_for_name(Name, Use) :-
+  loaded(LinkingFile),
+  generate_file_name(LinkingFile, Name, FileName),
+  atom_concat(FileName, '.pl', Use),
+  create_use(Use).
+
 find_uses(Uses) :-
   findall(Use, use(Use), Uses).
 
@@ -111,36 +125,36 @@ load_graph(File) :-
   find_uses(Uses),
   create_roots(Uses),
   consult_all(Uses),
-  set_loaded(true), !.
+  set_loaded(File), !.
 
 unload_graph :-
   retract_all,
   set_loaded(false).
 
 % Searching Theorems
-find_root(Descriptor, Label, File) :-
-  root(Descriptor, Label, File).
-find_root(Descriptor, Label, File) :-
+find_root(vertex(Descriptor, Label), File) :-
+  root(vertex(Descriptor, Label), File).
+find_root(vertex(Descriptor, Label), File) :-
   \+ is_root(Descriptor, Label),
   edge(ParentLabel, _, Label),
   ParentLabel \= Label,
   vertex(ParentDescriptor, ParentLabel),
-  find_root(ParentDescriptor, ParentLabel, File).
+  find_root(vertex(ParentDescriptor, ParentLabel), File).
 
-find_source(_, Label, File) :-
+find_source(vertex(_, Label), File) :-
   edge(Label, source, File).
-find_source(Descriptor, Label, File) :-
-  \+ is_root(Descriptor, Label),
+find_source(vertex(Descriptor, Label), File) :-
+  \+ is_root(vertex(Descriptor, Label)),
   edge(ParentLabel, _, Label),
   ParentLabel \= Label,
   vertex(ParentDescriptor, ParentLabel),
-  find_source(ParentDescriptor, ParentLabel, File).
+  find_source(vertex(ParentDescriptor, ParentLabel), File).
 
 find_file_roots(File, Roots) :-
-  findall(vertex(Descriptor, Label), root(Descriptor, Label, File), Roots).
+  findall(Term, root(Term, File), Roots).
 
 find_all_roots(Roots) :-
-  findall(vertex(Descriptor, Label), root(Descriptor, Label, _), Roots).
+  findall(Term, root(Term, _), Roots).
 
 % Rewriting Theorems
 rewrite_files([]).
@@ -152,4 +166,6 @@ rewrite_files([Use|Rest]) :-
 
 rewrite_graph :-
   find_uses(Uses),
-  rewrite_files(Uses).
+  rewrite_files(Uses),
+  loaded(LinkingFile),
+  rewrite_linking_file(LinkingFile, Uses).

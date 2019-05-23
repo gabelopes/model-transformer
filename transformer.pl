@@ -2,7 +2,7 @@
   apply_transformation/3
 ]).
 
-:- use_module(model/graph, [load_graph/1, find_source/3, rewrite_graph/0]).
+:- use_module(model/graph, [load_graph/1, create_use_for_name/2, create_root/2, find_source/2, rewrite_graph/0]).
 :- use_module(model/class, [get_class_name/2, create_class/6]).
 :- use_module(model/attribute, [add_attribute/5, create_accessors/4]).
 :- use_module(integration/java, [inject_attribute/5, inject_getter/4, inject_setter/4]).
@@ -25,7 +25,9 @@ create_class(Modifiers, QualifiedName, Parent, Interfaces) :-
   parse_array(Modifiers, ModifiersList),
   qualified_name(QualifiedName, Package, Name),
   parse_array(Interfaces, InterfacesList),
-  create_class(Package, ModifiersList, Name, Parent, InterfacesList, _).
+  create_class(Package, ModifiersList, Name, Parent, InterfacesList, Class),
+  create_use_for_name(Name, Use),
+  create_root(vertex(class, Class), Use).
 
 apply_transformation(Graph, Transformation, Arguments) :-
   string(Transformation),
