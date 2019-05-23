@@ -1,15 +1,15 @@
 :- use_module(model/model).
 :- use_module(transformer).
 
-start :-
+startC :-
   load_graph("/Users/sap/Workspace/Parthenos/tests/Company/graph.pl"),
   find_class("Employee", Class),
   add_attribute(Class, [protected], boolean, "fired", Attribute),
-  % create_panel(Class, "Employee Creation", Panel),
+  get_panel_for_class(Class, Panel),
   create_field(Panel, Attribute, "Is the employee fired?", true, 9, _),
   rewrite_graph.
 
-startA :-
+start :-
   apply_transformation(
     '/Users/sap/Workspace/Parthenos/tests/Company/graph.pl',
     'create_class',

@@ -1,5 +1,6 @@
 :- module(rewriter, [
-  rewrite_file/3
+  rewrite_file/3,
+  rewrite_linking_file/2
 ]).
 
 :- use_module('../graph', [edge/3, vertex/2]).
@@ -66,15 +67,15 @@ collect_all_facts([FileRoot|Rest], FileRoots, OtherFilesRoots, Facts) :-
   collect_all_facts(Rest, FileRoots, OtherFilesRoots, OtherFacts),
   append(PartialFacts, OtherFacts, Facts).
 
-collect_orphan_vertices(File, Vertices) :-
+collect_orphan_facts(File, Facts) :-
   black_box:load(File),
-  black_box:get_orphan_vertices(Vertices),
+  black_box:get_orphan_facts(Facts),
   black_box:unload.
 
 collect_knowledge_base(File, FileRoots, Roots, KnowledgeBase) :-
   subtract(Roots, FileRoots, OtherFilesRoots),
   collect_all_facts(FileRoots, FileRoots, OtherFilesRoots, Facts),
-  collect_orphan_vertices(File, Orphans),
+  collect_orphan_facts(File, Orphans),
   append(Facts, Orphans, KnowledgeBase).
 
 % Comparative Theorems
@@ -96,7 +97,7 @@ write_knowledge_base(Stream, [Fact|Rest]) :-
   write_knowledge_base(Stream, Rest).
 
 start_writing(File, Stream) :-
-  open(File, write, Stream).
+  open(File, write, Stream, [create([default])]).
 
 finish_writing(Stream) :-
   close(Stream).
@@ -109,3 +110,9 @@ rewrite_file(File, FileRoots, Roots) :-
   write_knowledge_base(Stream, SortedKnowledgeBase),
   finish_writing(Stream),
   retract_visits.
+
+rewrite_linking_file(File, Uses) :-
+  sort_knowledge_base(Uses, SortedUses),
+  start_writing(File, Stream),
+  write_knowledge_base(Stream, SortedUses),
+  finish_writing(Stream).
