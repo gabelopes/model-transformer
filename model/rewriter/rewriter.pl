@@ -68,14 +68,18 @@ collect_all_facts([FileRoot|Rest], FileRoots, OtherFilesRoots, Facts) :-
   append(PartialFacts, OtherFacts, Facts).
 
 collect_orphan_facts(File, Facts) :-
-  black_box:load(File),
-  black_box:get_orphan_facts(Facts),
-  black_box:unload.
+  exists_file(File),
+  load_black_box(File),
+  get_orphan_facts(Facts),
+  unload_black_box.
+collect_orphan_facts(_, []).
 
 collect_knowledge_base(File, FileRoots, Roots, KnowledgeBase) :-
   subtract(Roots, FileRoots, OtherFilesRoots),
   collect_all_facts(FileRoots, FileRoots, OtherFilesRoots, Facts),
   collect_orphan_facts(File, Orphans),
+  findall(vertex(A, B), vertex(A, B), C),
+  append(C, [], _).
   append(Facts, Orphans, KnowledgeBase).
 
 % Comparative Theorems

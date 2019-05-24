@@ -68,7 +68,7 @@ create_roots([Term|Rest], File) :-
   create_roots(Rest, File).
 
 create_roots([]).
-create_roots([Use|Rest]) :-
+create_roots([use(Use)|Rest]) :-
   consult(Use),
   find_root_vertices(Vertices),
   create_roots(Vertices, Use),
@@ -97,7 +97,7 @@ create_use_for_name(Name, Use) :-
   create_use(Use).
 
 find_uses(Uses) :-
-  findall(Use, use(Use), Uses).
+  findall(use(Use), use(Use), Uses).
 
 retract_uses :-
   retractall(use(_)).
@@ -109,8 +109,10 @@ retract_all :-
   retract_uses.
 
 % Consulting Theorems
-consult_all(Uses) :-
-  maplist(consult, Uses).
+consult_all([]).
+consult_all([use(Use)|Rest]) :-
+  consult(Use),
+  consult_all(Rest).
 
 % Loading Theorems
 loaded(false).
@@ -158,7 +160,7 @@ find_all_roots(Roots) :-
 
 % Rewriting Theorems
 rewrite_files([]).
-rewrite_files([Use|Rest]) :-
+rewrite_files([use(Use)|Rest]) :-
   find_file_roots(Use, FileRoots),
   find_all_roots(Roots),
   rewrite_file(Use, FileRoots, Roots),

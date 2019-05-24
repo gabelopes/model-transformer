@@ -1,18 +1,20 @@
 :- module(black_box, [
-  load/1,
-  unload/0,
+  load_black_box/1,
+  unload_black_box/0,
   get_orphan_facts/1
 ]).
 
 :- use_module('../graph', [is_root/1]).
 
 % Loading Theorems
-load(File) :-
+load_black_box(File) :-
+  exists_file(File),
   load_files([File], [register(false)]).
+load_black_box(_).
 
-unload :-
-  abolish(edge/3),
-  abolish(vertex/2).
+unload_black_box :-
+  abolish(black_box:edge/3),
+  abolish(black_box:vertex/2).
 
 % Oprhan Vertices Theorems
 is_orphan(vertex(Descriptor, Label)) :-
