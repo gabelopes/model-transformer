@@ -3,9 +3,8 @@
   rewrite_linking_file/2
 ]).
 
-:- use_module('../graph', [edge/3, vertex/2]).
+:- use_module('../graph', [edge/3, vertex/2, is_root/1]).
 :- use_module('../../arrays', [filter/3]).
-:- use_module(black_box).
 
 :- dynamic visited/1.
 
@@ -67,19 +66,32 @@ collect_all_facts([FileRoot|Rest], FileRoots, OtherFilesRoots, Facts) :-
   collect_all_facts(Rest, FileRoots, OtherFilesRoots, OtherFacts),
   append(PartialFacts, OtherFacts, Facts).
 
-collect_orphan_facts(File, Facts) :-
-  exists_file(File),
-  load_black_box(File),
-  get_orphan_facts(Facts),
-  unload_black_box.
-collect_orphan_facts(_, []).
+% Oprhan Vertices Theorems
+is_orphan(vertex(Descriptor, Label)) :-
+  \+ is_root(vertex(Descriptor, Label)),
+  \+ edge(_, _, Label).
 
-collect_knowledge_base(File, FileRoots, Roots, KnowledgeBase) :-
+collect_orphan_edges([], []).
+collect_orphan_edges([vertex(_, VertexLabel)|Rest], Edges) :-
+  findall(edge(VertexLabel, Label, Tail), edge(VertexLabel, Label, Tail), VertexEdges),
+  collect_orphan_edges(Rest, Partial),
+  append(VertexEdges, Partial, Edges).
+
+collect_orphan_vertices(Vertices) :-
+  findall(vertex(Descriptor, Label), (
+    vertex(Descriptor, Label),
+    is_orphan(vertex(Descriptor, Label))
+  ), Vertices).
+
+collect_orphan_facts(Facts) :-
+  collect_orphan_vertices(Vertices),
+  collect_orphan_edges(Vertices, Edges),
+  append(Vertices, Edges, Facts).
+
+collect_knowledge_base(FileRoots, Roots, KnowledgeBase) :-
   subtract(Roots, FileRoots, OtherFilesRoots),
   collect_all_facts(FileRoots, FileRoots, OtherFilesRoots, Facts),
-  collect_orphan_facts(File, Orphans),
-  findall(vertex(A, B), vertex(A, B), C),
-  append(C, [], _).
+  collect_orphan_facts(Orphans),
   append(Facts, Orphans, KnowledgeBase).
 
 % Comparative Theorems
@@ -108,7 +120,7 @@ finish_writing(Stream) :-
 
 % Rewriting Theorems
 rewrite_file(File, FileRoots, Roots) :-
-  collect_knowledge_base(File, FileRoots, Roots, KnowledgeBase),
+  collect_knowledge_base(FileRoots, Roots, KnowledgeBase),
   sort_knowledge_base(KnowledgeBase, SortedKnowledgeBase),
   start_writing(File, Stream),
   write_knowledge_base(Stream, SortedKnowledgeBase),

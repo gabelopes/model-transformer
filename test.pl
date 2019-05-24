@@ -1,8 +1,11 @@
 :- use_module(model/model).
 :- use_module(transformer).
 
+file("C:/Users/Gabriel/Desktop/SimpleGraph/graph.pl").
+
 startC :-
-  load_graph("/Users/sap/Workspace/Parthenos/tests/Company/graph.pl"),
+  file(File),
+  load_graph(File),
   find_class("Employee", Class),
   add_attribute(Class, [protected], boolean, "fired", Attribute),
   get_panel_for_class(Class, Panel),
@@ -10,13 +13,13 @@ startC :-
   rewrite_graph.
 
 start :-
+  file(File),
   apply_transformation(
-    '/Users/sap/Workspace/Parthenos/tests/Company/graph.pl',
-    'create_class',
+    File,
+    'create-class',
     [
       '["public", "final"]',
       'br.unisinos.parthenos.test.Child',
-      'com.company.Person',
       '[]'
     ]
   ).
