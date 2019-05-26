@@ -55,7 +55,9 @@ invoke_injector_with_output(Extension, Language, Injection, JSON, Output) :-
   invoke_java_with_output(Injector, ["-e", Extension, "-l", Language, "-i", Injection, JSON], Output).
 
 invoke_injector(Extension, File, Language, Injection, JSON) :-
-  invoke_injector_with_output(Extension, File, Language, Injection, JSON).
+  get_injector_executable_path(Injector),
+  invoke_java(Injector, ["-e", Extension, "-s", File, "-l", Language, "-i", Injection, JSON]).
 
 invoke_injector(Extension, Language, Injection, JSON) :-
-  invoke_injector_with_output(Extension, Language, Injection, JSON).
+  get_injector_executable_path(Injector),
+  invoke_java(Injector, ["-e", Extension, "-l", Language, "-i", Injection, JSON]).

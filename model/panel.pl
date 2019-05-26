@@ -135,6 +135,7 @@ remove_class_panel(Class) :-
   remove_panel(Panel).
 remove_panel(Panel) :-
   remove_vertex(panel, Panel),
+  remove_edge(_, panel, Panel),
   remove_edge(Panel, label, _),
   remove_edge(Panel, visible, _),
   remove_edge(Panel, position, _).

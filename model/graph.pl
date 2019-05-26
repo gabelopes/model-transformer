@@ -6,9 +6,11 @@
   create_edge/3,
   replace_edge/2,
   remove_edge/3,
+  remove_all_edges/3,
   create_vertex/2,
   replace_vertex/2,
   remove_vertex/2,
+  remove_all_vertices/2,
   create_root/2,
   is_root/1,
   create_use/1,
@@ -44,6 +46,10 @@ remove_edge(Head, Label, Tail) :-
   retract(edge(Head, Label, Tail)).
 remove_edge(_, _, _).
 
+remove_all_edges(Head, Label, Tail) :-
+  retractall(edge(Head, Label, Tail)).
+remove_all_edges(_, _, _).
+
 create_vertex(Descriptor, Label) :-
   assertz(vertex(Descriptor, Label)).
 
@@ -54,6 +60,10 @@ replace_vertex(vertex(Descriptor, Label), vertex(ForDescriptor, ForLabel)) :-
 remove_vertex(Descriptor, Label) :-
   retract(vertex(Descriptor, Label)).
 remove_vertex(_, _).
+
+remove_all_vertices(Descriptor, Label) :-
+  retractall(vertex(Descriptor, Label)).
+remove_all_vertices(_, _).
 
 retract_graph :-
   retractall(edge(_, _, _)),

@@ -17,7 +17,7 @@ transformation('add-attribute', [Class, Modifiers, Type, Name]) :-
   parse_array(Modifiers, ModifiersList), !,
   add_attribute(Class, ModifiersList, Type, Name, Attribute),
   create_accessors(Class, Attribute, Type, Name),
-  find_source(Attribute, File),
+  find_source(vertex(attribute, Attribute), File),
   get_class_name(Class, ClassName),
   inject_attribute(File, ClassName, ModifiersList, Type, Name),
   inject_getter(File, ClassName, ModifiersList, Name),
@@ -43,67 +43,78 @@ transformation('create-panel', [Class|Arguments]) :-
   CreatePanelGoal =.. ['create_panel', Class|Arguments],
   call(CreatePanelGoal, _),
   find_source(vertex(class, Class), SourceFile),
-  InjectPanelGoal =.. ['inject_panel', SourceFile, Class|Arguments],
-  class(InjectPanelGoal).
+  get_class_name(Class, ClassName),
+  InjectPanelGoal =.. ['inject_panel', SourceFile, ClassName|Arguments],
+  call(InjectPanelGoal).
 
 transformation('show-panel', [Class]) :-
   show_class_panel(Class),
   find_source(vertex(class, Class), SourceFile),
-  inject_panel_visibility(SourceFile, Class, true).
+  get_class_name(Class, ClassName),
+  inject_panel_visibility(SourceFile, ClassName, true).
 
 transformation('hide-panel', [Class]) :-
   hide_class_panel(Class),
   find_source(vertex(class, Class), SourceFile),
-  inject_panel_visibility(SourceFile, Class, false).
+  get_class_name(Class, ClassName),
+  inject_panel_visibility(SourceFile, ClassName, false).
 
 transformation('set-panel-label', [Class, Label]) :-
   set_class_panel_label(Class, Label),
   find_source(vertex(class, Class), SourceFile),
-  inject_panel_label(SourceFile, Class, Label).
+  get_class_name(Class, ClassName),
+  inject_panel_label(SourceFile, ClassName, Label).
 
 transformation('set-panel-position', [Class, Position]) :-
   set_class_panel_position(Class, Position),
   find_source(vertex(class, Class), SourceFile),
-  inject_panel_position(SourceFile, Class, Position).
+  get_class_name(Class, ClassName),
+  inject_panel_position(SourceFile, ClassName, Position).
 
 transformation('remove-panel', [Class]) :-
   remove_class_panel(Class),
   find_source(vertex(class, Class), SourceFile),
-  inject_panel_deletion(SourceFile, Class).
+  get_class_name(Class, ClassName),
+  inject_panel_deletion(SourceFile, ClassName).
 
 % Field
 transformation('create-field', [Class|Arguments]) :-
-  get_panel_for_class(Class, Panel), !,
-  CreateFieldGoal =.. ['create-field', Panel|Arguments],
+  CreateFieldGoal =.. ['create_field', Class|Arguments],
   call(CreateFieldGoal, _),
   find_source(vertex(class, Class), SourceFile),
-  InjectFieldGoal =.. ['inject_field', SourceFile, Class|Arguments],
-  class(InjectPanelGoal).
+  get_class_name(Class, ClassName),
+  InjectFieldGoal =.. ['inject_field', SourceFile, ClassName|Arguments],
+  call(InjectFieldGoal).
 
 transformation('show-field', [Class, Attribute]) :-
   show_field(Class, Attribute),
   find_source(vertex(class, Class), SourceFile),
-  inject_field_visibility(SourceFile, Class, Attribute, true).
+  get_class_name(Class, ClassName),
+  inject_field_visibility(SourceFile, ClassName, Attribute, true).
 
 transformation('hide-field', [Class, Attribute]) :-
   hide_field(Class, Attribute),
   find_source(vertex(class, Class), SourceFile),
-  inject_field_visibility(SourceFile, Class, Attribute, false).
+  get_class_name(Class, ClassName),
+  inject_field_visibility(SourceFile, ClassName, Attribute, false).
 
 transformation('set-field-label', [Class, Attribute, Label]) :-
   set_field_label(Class, Attribute, Label),
   find_source(vertex(class, Class), SourceFile),
-  inject_field_label(SourceFile, Class, Attribute, Label).
+  get_class_name(Class, ClassName),
+  inject_field_label(SourceFile, ClassName, Attribute, Label).
 
 transformation('set-field-position', [Class, Attribute, Position]) :-
   set_field_position(Class, Attribute, Position),
   find_source(vertex(class, Class), SourceFile),
-  inject_field_position(SourceFile, Class, Attribute, Position).
+  get_class_name(Class, ClassName),
+  inject_field_position(SourceFile, ClassName, Attribute, Position).
 
 transformation('remove-field', [Class, Attribute]) :-
   remove_field(Class, Attribute),
   find_source(vertex(class, Class), SourceFile),
-  inject_field_deletion(SourceFile, Attribute, Class).
+  get_class_name(Class, ClassName),
+  inject_field_deletion(SourceFile, ClassName, Attribute).
 
 %% Transformation Application
 apply_transformation(Graph, Transformation, Arguments) :-

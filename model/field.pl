@@ -19,10 +19,10 @@
   remove_field/1
 ]).
 
-:- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2, replace_edge/2, replace_vertex/2, remove_edge/3, remove_vertex/2]).
-:- use_module(attribute, [is_attribute/1, get_attribute_name/2]).
+:- use_module(graph).
+:- use_module(attribute, [is_attribute/1, find_attribute_by_name/3]).
 :- use_module('../representation/qualified_name', [generate_qualified_name/2]).
-:- use_module(panel, [is_panel/1]).
+:- use_module(panel, [is_panel/1, get_panel_for_class/2]).
 
 field(QualifiedName) -->
   "field:",
@@ -82,14 +82,15 @@ can_create_field(Panel, Attribute) :-
   \+ edge(Attribute, field, _).
 
 % Creation Theorems
-create_field(Panel, Attribute, Field) :-
-  get_attribute_name(Attribute, Name),
-  create_field(Panel, Attribute, Name, Field).
-create_field(Panel, Attribute, Label, Field) :-
-  create_field(Panel, Attribute, Label, true, Field).
-create_field(Panel, Attribute, Label, Visibility, Field) :-
-  create_field(Panel, Attribute, Label, Visibility, 0, Field).
-create_field(Panel, Attribute, Label, Visibility, Position, Field) :-
+create_field(Class, AttributeName, Field) :-
+  create_field(Class, AttributeName, AttributeName, Field).
+create_field(Class, AttributeName, Label, Field) :-
+  create_field(Class, AttributeName, Label, true, Field).
+create_field(Class, AttributeName, Label, Visibility, Field) :-
+  create_field(Class, AttributeName, Label, Visibility, 0, Field).
+create_field(Class, AttributeName, Label, Visibility, Position, Field) :-
+  get_panel_for_class(Class, Panel),
+  find_attribute_by_name(Class, AttributeName, Attribute),
   can_create_field(Panel, Attribute),
   get_field_identifier(Attribute, FieldIdentifier),
   generate_qualified_name([FieldIdentifier], Field),
@@ -137,9 +138,11 @@ set_field_position(Field, Position) :-
 % Removal Theorems
 remove_field(Class, Attribute) :-
   get_class_field(Class, Attribute, Field),
+  is_field(Field),
   remove_field(Field).
 remove_field(Field) :-
   remove_vertex(field, Field),
+  remove_all_edges(_, field, Field),
   remove_edge(Field, label, _),
   remove_edge(Field, visible, _),
   remove_edge(Field, position, _).
