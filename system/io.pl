@@ -1,6 +1,7 @@
 :- module(io, [
   escape_argument/2,
-  escape_arguments/2
+  escape_arguments/2,
+  read_stream_to_lines/2
 ]).
 
 escape_argument(Argument, Escaped) :-
@@ -17,3 +18,9 @@ escape_arguments([Argument], [Escaped]) :-
 escape_arguments([Argument|Rest], [Escaped|EscapedRest]) :-
   escape_arguments(Rest, EscapedRest),
   escape_argument(Argument, Escaped).
+
+read_stream_to_lines(Stream, [Line|Rest]) :-
+  read_line_to_string(Stream, Line),
+  Line \= end_of_file,
+  read_stream_to_lines(Stream, Rest).
+read_stream_to_lines(_, []).

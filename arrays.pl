@@ -2,7 +2,8 @@
   has_multiple_occurrences/2,
   occurrences/3,
   filter/3,
-  parse_array/2
+  parse_array/2,
+  get_last_element/2
 ]).
 
 has_multiple_occurrences(Element, Array) :-
@@ -25,6 +26,11 @@ filter([Element|ArrayRest], Predicate, [Element|FilteredRest]) :-
   filter(ArrayRest, Predicate, FilteredRest).
 filter([_|ArrayRest], Predicate, FilteredRest) :-
   filter(ArrayRest, Predicate, FilteredRest).
+
+get_last_element([], _) :- fail.
+get_last_element([Last], Last).
+get_last_element([_|Rest], Last) :-
+  get_last_element(Rest, Last).
 
 %% Array Parsing DCG
 array([]) --> space.

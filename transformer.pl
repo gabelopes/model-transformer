@@ -2,7 +2,7 @@
   apply_transformation/3
 ]).
 
-:- use_module(model/graph, [load_graph/1, create_use_for_name/2, create_root/2, find_source/2, repository/1, rewrite_graph/0]).
+:- use_module(model/graph, [create_edge/3, load_graph/1, create_use_for_name/2, create_root/2, find_source/2, repository/1, rewrite_graph/0]).
 :- use_module(model/class, [get_class_name/2, create_class/6]).
 :- use_module(model/attribute, [add_attribute/5, create_accessors/4]).
 :- use_module(model/panel, [get_panel_for_class/2, create_panel/2, create_panel/3, create_panel/4, create_panel/5, show_class_panel/1, hide_class_panel/1, remove_class_panel/1, set_class_panel_label/2, set_class_panel_position/2]).

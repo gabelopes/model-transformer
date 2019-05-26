@@ -1,7 +1,7 @@
 :- use_module(model/model).
 :- use_module(transformer).
 
-file("C:/Users/Gabriel/Desktop/Company/Company.pl").
+file("/Users/sap/Workspace/Parthenos/tests/CompanyGraph/Company.pl").
 
 startC :-
   file(File),

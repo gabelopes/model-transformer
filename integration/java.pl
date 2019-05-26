@@ -5,8 +5,9 @@
   inject_class/7
 ]).
 
-:- use_module(injector).
 :- use_module(library(http/json)).
+:- use_module(injector).
+:- use_module('../arrays', [get_last_element/2]).
 
 get_language("java").
 
@@ -38,5 +39,6 @@ inject_setter(File, Class, Modifiers, Attribute) :-
 
 inject_class(Folder, Package, Modifiers, Name, Parent, Interfaces, SourceFile) :-
   atom_json_dict(JSON, _{ package: Package, modifiers: Modifiers, name: Name, parent: Parent, interfaces: Interfaces }, []),
-  invoke_injector_with_output(Folder, "create-class", JSON, SourceFile),
-  write(SourceFile).
+  invoke_injector_with_output(Folder, "create-class", JSON, Output),
+  get_last_element(Output, Last),
+  atom_string(SourceFile, Last).
