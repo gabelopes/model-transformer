@@ -4,7 +4,8 @@
   join_strings/3,
   join_atoms/3,
   capitalize/2,
-  atoms_strings/2
+  atoms_strings/2,
+  atom_to_number/2
 ]).
 
 join_strings(Initial, [], _, Initial).
@@ -49,3 +50,13 @@ atoms_strings([], []).
 atoms_strings([Atom|Atoms], [String|Strings]) :-
   atom_string(Atom, String),
   atoms_strings(Atoms, Strings).
+
+atom_to_number(Atom, Atom) :-
+  number(Atom).
+atom_to_number(Atom, Number) :-
+  atom(Atom),
+  atom_number(Atom, Number).
+atom_to_number(String, Number) :-
+  string(String),
+  atom_string(Atom, String),
+  atom_to_number(Atom, Number).

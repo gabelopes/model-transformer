@@ -22,6 +22,7 @@
 :- use_module(graph).
 :- use_module(attribute, [is_attribute/1, find_attribute_by_name/3]).
 :- use_module('../representation/qualified_name', [generate_qualified_name/2]).
+:- use_module('../representation/text', [atom_to_number/2]).
 :- use_module(panel, [is_panel/1, get_panel_for_class/2]).
 
 field(QualifiedName) -->
@@ -91,7 +92,7 @@ create_field(Class, AttributeName, Label, Visibility, Field) :-
 create_field(Class, AttributeName, Label, Visibility, Position, Field) :-
   atom_string(AttributeName, AttributeNameString),
   atom_string(Label, LabelString),
-  atom_number(Position, PositionNumber),
+  atom_to_number(Position, PositionNumber),
   get_panel_for_class(Class, Panel),
   find_attribute_by_name(Class, AttributeNameString, Attribute),
   can_create_field(Panel, Attribute),
@@ -137,10 +138,10 @@ set_field_label(Field, Label) :-
   set_field_property(Field, label, LabelString).
 
 set_field_position(Class, Attribute, Position) :-
-  atom_number(Position, PositionNumber),
+  atom_to_number(Position, PositionNumber),
   set_field_property(Class, Attribute, position, PositionNumber).
 set_field_position(Field, Position) :-
-  atom_number(Position, PositionNumber),
+  atom_to_number(Position, PositionNumber),
   set_field_property(Field, position, PositionNumber).
 
 % Removal Theorems

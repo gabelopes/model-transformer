@@ -19,6 +19,7 @@
 
 :- use_module(library(http/json)).
 :- use_module(injector).
+:- use_module('../representation/text', [atom_to_number/2]).
 
 get_language("pojo-ui").
 
@@ -43,7 +44,8 @@ inject_panel(File, Class, Label, Visibility) :-
   atom_json_dict(JSON, _{ class: Class, label: Label, visible: Visibility }, []),
   invoke_injector(File, "create-panel", JSON).
 inject_panel(File, Class, Label, Visibility, Position) :-
-  atom_json_dict(JSON, _{ class: Class, label: Label, visible: Visibility, position: Position }, []),
+  atom_to_number(Position, PositionNumber),
+  atom_json_dict(JSON, _{ class: Class, label: Label, visible: Visibility, position: PositionNumber }, []),
   invoke_injector(File, "create-panel", JSON).
 
 inject_panel_label(File, Class, Label) :-
@@ -55,7 +57,8 @@ inject_panel_visibility(File, Class, Visibility) :-
   invoke_injector(File, "set-panel-visibility", JSON).
 
 inject_panel_position(File, Class, Position) :-
-  atom_json_dict(JSON, _{ class: Class, position: Position }, []),
+  atom_to_number(Position, PositionNumber),
+  atom_json_dict(JSON, _{ class: Class, position: PositionNumber }, []),
   invoke_injector(File, "set-panel-position", JSON).
 
 inject_panel_deletion(File, Class) :-
@@ -73,7 +76,8 @@ inject_field(File, Class, Attribute, Label, Visibility) :-
   atom_json_dict(JSON, _{ class: Class, attribute: Attribute, label: Label, visible: Visibility }, []),
   invoke_injector(File, "create-field", JSON).
 inject_field(File, Class, Attribute, Label, Visibility, Position) :-
-  atom_json_dict(JSON, _{ class: Class, attribute: Attribute, label: Label, visible: Visibility, position: Position }, []),
+  atom_to_number(Position, PositionNumber),
+  atom_json_dict(JSON, _{ class: Class, attribute: Attribute, label: Label, visible: Visibility, position: PositionNumber }, []),
   invoke_injector(File, "create-field", JSON).
 
 inject_field_label(File, Class, Attribute, Label) :-
@@ -85,7 +89,8 @@ inject_field_visibility(File, Class, Attribute, Visibility) :-
   invoke_injector(File, "set-field-visibility", JSON).
 
 inject_field_position(File, Class, Attribute, Position) :-
-  atom_json_dict(JSON, _{ class: Class, attribute: Attribute, position: Position }, []),
+  atom_to_number(Position, PositionNumber),
+  atom_json_dict(JSON, _{ class: Class, attribute: Attribute, position: PositionNumber }, []),
   invoke_injector(File, "set-field-position", JSON).
 
 inject_field_deletion(File, Class, Attribute) :-

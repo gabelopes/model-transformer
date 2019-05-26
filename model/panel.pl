@@ -25,6 +25,7 @@
 :- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2, replace_edge/2, replace_vertex/2, remove_edge/3, remove_vertex/2]).
 :- use_module(class, [is_class/1, get_class_name/2]).
 :- use_module('../representation/qualified_name', [generate_qualified_name/2]).
+:- use_module('../representation/text', [atom_to_number/2]).
 
 panel(QualifiedName) -->
   "panel:",
@@ -87,7 +88,7 @@ create_panel(Class, Label, Visibility, Panel) :-
   create_panel(Class, Label, Visibility, 0, Panel).
 create_panel(Class, Label, Visibility, Position, Panel) :-
   atom_string(Label, LabelString),
-  atom_number(Position, PositionNumber),
+  atom_to_number(Position, PositionNumber),
   can_create_panel(Class),
   get_panel_identifier(Class, PanelIdentifier),
   generate_qualified_name([PanelIdentifier], Panel),
@@ -129,10 +130,10 @@ set_panel_label(Panel, Label) :-
   set_panel_property(Panel, label, LabelString).
 
 set_class_panel_position(Class, Position) :-
-  atom_number(Position, PositionNumber),
+  atom_to_number(Position, PositionNumber),
   set_class_panel_property(Class, position, PositionNumber).
 set_panel_position(Panel, Position) :-
-  atom_number(Position, PositionNumber),
+  atom_to_number(Position, PositionNumber),
   set_panel_property(Panel, position, PositionNumber).
 
 % Removal Theorems
