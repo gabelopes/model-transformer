@@ -14,10 +14,11 @@
   create_use/1,
   create_use_for_name/2,
   find_source/2,
+  repository/1,
   rewrite_graph/0
 ]).
 
-:- use_module(rewriter/rewriter, [rewrite_file/3, rewrite_linking_file/2]).
+:- use_module(rewriter/rewriter, [rewrite_file/3, rewrite_linking_file/3]).
 :- use_module('../arrays', [filter/3]).
 :- use_module('../representation/qualified_name', [generate_file_name/3]).
 
@@ -29,6 +30,7 @@
 :- dynamic root/2.
 :- dynamic edge/3.
 :- dynamic vertex/2.
+:- dynamic repository/1.
 
 % Graph Theorems
 create_edge(Head, Label, Tail) :-
@@ -170,4 +172,5 @@ rewrite_graph :-
   find_uses(Uses),
   rewrite_files(Uses),
   loaded(LinkingFile),
-  rewrite_linking_file(LinkingFile, Uses).
+  repository(Repository),
+  rewrite_linking_file(LinkingFile, repository(Repository), Uses).

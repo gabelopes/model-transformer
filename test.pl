@@ -1,7 +1,7 @@
 :- use_module(model/model).
 :- use_module(transformer).
 
-file("C:/Users/Gabriel/Desktop/SimpleGraph/graph.pl").
+file("C:/Users/Gabriel/Desktop/Company/Company.pl").
 
 startC :-
   file(File),
@@ -18,8 +18,9 @@ start :-
     File,
     'create-class',
     [
-      '["public", "final"]',
-      'br.unisinos.parthenos.test.Child',
+      '["public"]',
+      'com.company.Boss',
+      'com.company.Employee',
       '[]'
     ]
   ).

@@ -1,6 +1,6 @@
 :- module(rewriter, [
   rewrite_file/3,
-  rewrite_linking_file/2
+  rewrite_linking_file/3
 ]).
 
 :- use_module('../graph', [edge/3, vertex/2, is_root/1]).
@@ -127,8 +127,8 @@ rewrite_file(File, FileRoots, Roots) :-
   finish_writing(Stream),
   retract_visits.
 
-rewrite_linking_file(File, Uses) :-
+rewrite_linking_file(File, Repository, Uses) :-
   sort_knowledge_base(Uses, SortedUses),
   start_writing(File, Stream),
-  write_knowledge_base(Stream, SortedUses),
+  write_knowledge_base(Stream, [Repository|SortedUses]),
   finish_writing(Stream).
