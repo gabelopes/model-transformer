@@ -113,11 +113,12 @@ create_interfaces_edges(Class, [Interface|Rest]) :-
 create_class(Package, Modifiers, Name, Interfaces, Class) :-
   create_class(Package, Modifiers, Name, _, Interfaces, Class).
 create_class(Package, Modifiers, Name, Parent, Interfaces, Class) :-
-  can_create_class(Package, Modifiers, Name, Parent, Interfaces),
+  atom_string(Name, NameString),
+  can_create_class(Package, Modifiers, NameString, Parent, Interfaces),
   generate_qualified_name([Package, Name], Class),
   create_vertex(class, Class),
   create_modifiers_edges(Class, Modifiers),
-  create_edge(Class, name, Name),
+  create_edge(Class, name, NameString),
   create_edge(Class, package, Package),
   create_parent_edge(Class, Parent),
   create_interfaces_edges(Class, Interfaces).

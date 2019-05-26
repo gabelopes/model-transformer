@@ -87,13 +87,14 @@ create_accessors(Class, Attribute, Type, Name) :-
   create_setter(Class, Attribute, Type, Name).
 
 add_attribute(Class, Modifiers, Type, Name, Attribute) :-
-  can_add_attribute(Class, Modifiers, Type, Name),
+  atom_string(Name, NameString),
+  can_add_attribute(Class, Modifiers, Type, NameString),
   generate_qualified_name([Class, Name], Attribute),
   create_vertex(attribute, Attribute),
   create_edge(Class, attribute, Attribute),
   create_modifiers_edges(Attribute, Modifiers),
   create_edge(Attribute, type, Type),
-  create_edge(Attribute, name, Name).
+  create_edge(Attribute, name, NameString).
 
 % Metadata Theorems
 mark_getter(Attribute, Method) :-

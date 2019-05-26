@@ -89,21 +89,25 @@ create_field(Class, AttributeName, Label, Field) :-
 create_field(Class, AttributeName, Label, Visibility, Field) :-
   create_field(Class, AttributeName, Label, Visibility, 0, Field).
 create_field(Class, AttributeName, Label, Visibility, Position, Field) :-
+  atom_string(AttributeName, AttributeNameString),
+  atom_string(Label, LabelString),
+  atom_number(Position, PositionNumber),
   get_panel_for_class(Class, Panel),
-  find_attribute_by_name(Class, AttributeName, Attribute),
+  find_attribute_by_name(Class, AttributeNameString, Attribute),
   can_create_field(Panel, Attribute),
   get_field_identifier(Attribute, FieldIdentifier),
   generate_qualified_name([FieldIdentifier], Field),
   create_vertex(field, Field),
   create_edge(Panel, field, Field),
   create_edge(Attribute, field, Field),
-  create_edge(Field, label, Label),
+  create_edge(Field, label, LabelString),
   create_edge(Field, visible, Visibility),
-  create_edge(Field, position, Position).
+  create_edge(Field, position, PositionNumber).
 
 % Replacement Theorems
 set_field_property(Class, Attribute, Property, Value) :-
-  get_class_field(Class, Attribute, Field),
+  atom_string(Attribute, AttributeString),
+  get_class_field(Class, AttributeString, Field),
   set_field_property(Field, Property, Value).
 set_field_property(Field, Property, Value) :-
   is_field(Field),
@@ -126,18 +130,23 @@ set_field_visible(Field, Visibility) :-
   set_field_property(Field, visible, Visibility).
 
 set_field_label(Class, Attribute, Label) :-
-  set_field_property(Class, Attribute, label, Label).
+  atom_string(Label, LabelString),
+  set_field_property(Class, Attribute, label, LabelString).
 set_field_label(Field, Label) :-
-  set_field_property(Field, label, Label).
+  atom_string(Label, LabelString),
+  set_field_property(Field, label, LabelString).
 
 set_field_position(Class, Attribute, Position) :-
-  set_field_property(Class, Attribute, position, Position).
+  atom_number(Position, PositionNumber),
+  set_field_property(Class, Attribute, position, PositionNumber).
 set_field_position(Field, Position) :-
-  set_field_property(Field, position, Position).
+  atom_number(Position, PositionNumber),
+  set_field_property(Field, position, PositionNumber).
 
 % Removal Theorems
 remove_field(Class, Attribute) :-
-  get_class_field(Class, Attribute, Field),
+  atom_string(Attribute, AttributeString),
+  get_class_field(Class, AttributeString, Field),
   is_field(Field),
   remove_field(Field).
 remove_field(Field) :-

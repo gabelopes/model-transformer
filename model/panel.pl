@@ -86,14 +86,16 @@ create_panel(Class, Label, Panel) :-
 create_panel(Class, Label, Visibility, Panel) :-
   create_panel(Class, Label, Visibility, 0, Panel).
 create_panel(Class, Label, Visibility, Position, Panel) :-
+  atom_string(Label, LabelString),
+  atom_number(Position, PositionNumber),
   can_create_panel(Class),
   get_panel_identifier(Class, PanelIdentifier),
   generate_qualified_name([PanelIdentifier], Panel),
   create_vertex(panel, Panel),
   create_edge(Class, panel, Panel),
-  create_edge(Panel, label, Label),
+  create_edge(Panel, label, LabelString),
   create_edge(Panel, visible, Visibility),
-  create_edge(Panel, position, Position).
+  create_edge(Panel, position, PositionNumber).
 
 % Replacement Theorems
 set_class_panel_property(Class, Property, Value) :-
@@ -120,14 +122,18 @@ set_panel_visible(Panel, Visibility) :-
   set_panel_property(Panel, visible, Visibility).
 
 set_class_panel_label(Class, Label) :-
-  set_class_panel_property(Class, label, Label).
+  atom_string(Label, LabelString),
+  set_class_panel_property(Class, label, LabelString).
 set_panel_label(Panel, Label) :-
-  set_panel_property(Panel, label, Label).
+  atom_string(Label, LabelString),
+  set_panel_property(Panel, label, LabelString).
 
 set_class_panel_position(Class, Position) :-
-  set_class_panel_property(Class, position, Position).
+  atom_number(Position, PositionNumber),
+  set_class_panel_property(Class, position, PositionNumber).
 set_panel_position(Panel, Position) :-
-  set_panel_property(Panel, position, Position).
+  atom_number(Position, PositionNumber),
+  set_panel_property(Panel, position, PositionNumber).
 
 % Removal Theorems
 remove_class_panel(Class) :-

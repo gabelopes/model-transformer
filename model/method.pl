@@ -115,11 +115,12 @@ create_parameters(Method, Parameters) :-
   create_parameters(Method, Parameters, 0), !.
 
 add_method(Class, Modifiers, Return, Name, Parameters, Method) :-
-  can_add_method(Class, Modifiers, Return, Name, Parameters),
+  atom_string(Name, NameString),
+  can_add_method(Class, Modifiers, Return, NameString, Parameters),
   generate_qualified_name([Class, Name], Method),
   create_vertex(method, Method),
   create_edge(Class, method, Method),
   create_modifiers_edges(Method, Modifiers),
   create_edge(Method, return, Return),
-  create_edge(Method, name, Name),
+  create_edge(Method, name, NameString),
   create_parameters(Method, Parameters).

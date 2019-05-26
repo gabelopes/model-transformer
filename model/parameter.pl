@@ -80,11 +80,12 @@ create_modifiers_edges(Parameter, [Modifier|Rest]) :-
   create_modifiers_edges(Parameter, Rest).
 
 add_parameter(Method, Modifiers, Type, Name, Order, Parameter) :-
+  atom_string(Name, NameString),
   can_add_parameter(Method, Modifiers, Type),
   generate_qualified_name([Method, Name], Parameter),
   create_vertex(parameter, Parameter),
   create_edge(Method, parameter, Parameter),
   create_modifiers_edges(Parameter, Modifiers),
   create_edge(Parameter, type, Type),
-  create_edge(Parameter, name, Name),
+  create_edge(Parameter, name, NameString),
   create_edge(Parameter, order, Order).
