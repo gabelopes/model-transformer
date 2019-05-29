@@ -5,6 +5,8 @@
 
 :- use_module('../graph', [edge/3, vertex/2, is_root/1]).
 :- use_module('../../arrays', [filter/3]).
+:- use_module('../../system/io', [write_lines/2]).
+:- use_module('../../representation/text', [term_to_string/2, sort_strings/2]).
 
 :- dynamic visited/1.
 
@@ -94,41 +96,32 @@ collect_knowledge_base(FileRoots, Roots, KnowledgeBase) :-
   collect_orphan_facts(Orphans),
   append(Facts, Orphans, KnowledgeBase).
 
-% Comparative Theorems
-fact_to_string(Fact, String) :-
-  with_output_to(string(String), portray_clause(Fact)).
-
-compare_facts(Delta, FactA, FactB) :-
-  fact_to_string(FactA, StringA),
-  fact_to_string(FactB, StringB),
-  compare(Delta, StringA, StringB).
-
-sort_knowledge_base(KnowledgeBase, Sorted) :-
-  predsort(compare_facts, KnowledgeBase, Sorted).
+%% Knowledge Base Writing
+% Converting Theorems
+knowledge_base_to_strings([], []).
+knowledge_base_to_strings([Fact|FactsRest], [String|StringsRest]) :-
+  term_to_string(Fact, String),
+  knowledge_base_to_strings(FactsRest, StringsRest).
 
 % Writing Theorems
-write_knowledge_base(_, []).
-write_knowledge_base(Stream, [Fact|Rest]) :-
-  portray_clause(Stream, Fact),
-  write_knowledge_base(Stream, Rest).
-
 start_writing(File, Stream) :-
   open(File, write, Stream, [create([default])]).
 
 finish_writing(Stream) :-
   close(Stream).
 
+write_knowledge_base(File, KnowledgeBase) :-
+  knowledge_base_to_strings(KnowledgeBase, KnowledgeBaseStrings),
+  sort_strings(KnowledgeBaseStrings, SortedKnowledgeBaseStrings),
+  start_writing(File, Stream),
+  write_lines(Stream, SortedKnowledgeBaseStrings),
+  finish_writing(Stream).
+
 % Rewriting Theorems
 rewrite_file(File, FileRoots, Roots) :-
   collect_knowledge_base(FileRoots, Roots, KnowledgeBase),
-  sort_knowledge_base(KnowledgeBase, SortedKnowledgeBase),
-  start_writing(File, Stream),
-  write_knowledge_base(Stream, SortedKnowledgeBase),
-  finish_writing(Stream),
+  write_knowledge_base(File, KnowledgeBase),
   retract_visits.
 
 rewrite_linking_file(File, Repository, Uses) :-
-  sort_knowledge_base(Uses, SortedUses),
-  start_writing(File, Stream),
-  write_knowledge_base(Stream, [Repository|SortedUses]),
-  finish_writing(Stream).
+  write_knowledge_base(File, [Repository|Uses]).

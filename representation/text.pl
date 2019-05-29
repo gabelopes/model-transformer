@@ -5,8 +5,12 @@
   join_atoms/3,
   capitalize/2,
   atoms_strings/2,
-  atom_to_number/2
+  atom_to_number/2,
+  term_to_string/2,
+  sort_strings/2
 ]).
+
+:- use_module('../system/io').
 
 join_strings(Initial, [], _, Initial).
 join_strings(Initial, [Head|Tail], Delimiter, Joined) :-
@@ -46,6 +50,7 @@ capitalize(Text, Capitalized) :-
   upcase_atom(FirstChar, CapitalizedFirstChar),
   string_chars(Capitalized, [CapitalizedFirstChar|Rest]).
 
+% Atom Conversion
 atoms_strings([], []).
 atoms_strings([Atom|Atoms], [String|Strings]) :-
   atom_string(Atom, String),
@@ -60,3 +65,14 @@ atom_to_number(String, Number) :-
   string(String),
   atom_string(Atom, String),
   atom_to_number(Atom, Number).
+
+% Terms
+term_to_string(Term, String) :-
+  with_output_to(string(String), io:write_fact(Term)).
+
+% Sorting
+compare_strings(Delta, StringA, StringB) :-
+  compare(Delta, StringA, StringB).
+
+sort_strings(Strings, Sorted) :-
+  predsort(compare_strings, Strings, Sorted).
