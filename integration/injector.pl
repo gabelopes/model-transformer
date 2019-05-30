@@ -23,8 +23,8 @@ invoke_java(Jar, Arguments, Timeout) :-
     stderr(std),
     process(PID),
     window(true)
-  ]),
-  process_wait(PID, _, [timeout(Timeout)]).
+  ]), !,
+  process_wait(PID, exit(0), [timeout(Timeout)]).
 invoke_java(Jar, Arguments) :-
   invoke_java(Jar, Arguments, 120).
 
@@ -36,8 +36,8 @@ invoke_java_with_output(Jar, Arguments, Timeout, Output) :-
     stderr(null),
     process(PID),
     window(true)
-  ]),
-  process_wait(PID, _, [timeout(Timeout)]),
+  ]), !,
+  process_wait(PID, exit(0), [timeout(Timeout)]),
   read_stream_to_lines(OutputStream, Output).
 invoke_java_with_output(Jar, Arguments, Output) :-
   invoke_java_with_output(Jar, Arguments, 120, Output).
