@@ -38,7 +38,13 @@ inject_setter(File, Class, Modifiers, Attribute) :-
   invoke_injector(File, "setter", JSON).
 
 inject_class(Folder, Package, Modifiers, Name, Parent, Interfaces, SourceFile) :-
+  nonvar(Parent),
   atom_json_dict(JSON, _{ package: Package, modifiers: Modifiers, name: Name, parent: Parent, interfaces: Interfaces }, []),
+  invoke_injector_with_output(Folder, "create-class", JSON, Output),
+  get_last_element(Output, Last),
+  atom_string(SourceFile, Last).
+inject_class(Folder, Package, Modifiers, Name, _, Interfaces, SourceFile) :-
+  atom_json_dict(JSON, _{ package: Package, modifiers: Modifiers, name: Name, interfaces: Interfaces }, []),
   invoke_injector_with_output(Folder, "create-class", JSON, Output),
   get_last_element(Output, Last),
   atom_string(SourceFile, Last).
