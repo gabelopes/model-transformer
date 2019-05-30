@@ -53,8 +53,14 @@ write_fact(Stream, edge(Head, Label, Tail)) :-
   writefe(Stream, 'edge(~w, ~w, ~w).', [Head, Label, Tail]).
 write_fact(Stream, vertex(Descriptor, Label)) :-
   writefe(Stream, 'vertex(~w, ~w).', [Descriptor, Label]).
+write_fact(Stream, root(vertex(Descriptor, Label))) :-
+  writefe(Stream, 'root(vertex(~w, ~w)).', [Descriptor, Label]).
+write_fact(Stream, repository(Repository)) :-
+  writefe(Stream, 'repository(~w).', [Repository]).
+write_fact(Stream, use(Use)) :-
+  writefe(Stream, 'use(~w).', [Use]).
 write_fact(Stream, Fact) :-
-  portray_clause(Stream, Fact).
+  write_term(Stream, Fact, [nl(false), quoted(true), fullstop(true)]).
 
 write_fact(Fact) :-
   current_output(OutputStream),

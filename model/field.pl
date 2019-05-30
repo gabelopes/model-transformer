@@ -152,7 +152,7 @@ remove_field(Class, Attribute) :-
   remove_field(Field).
 remove_field(Field) :-
   remove_vertex(field, Field),
-  remove_all_edges(_, field, Field),
+  remove_edges(_, field, Field),
   remove_edge(Field, label, _),
   remove_edge(Field, visible, _),
   remove_edge(Field, position, _).

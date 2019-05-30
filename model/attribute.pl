@@ -6,7 +6,7 @@
   get_attribute_type/2,
   get_attribute_name/2,
   add_attribute/5,
-  create_accessors/4
+  create_accessors/2
 ]).
 
 :- use_module(graph, [edge/3, vertex/2, create_edge/3, create_vertex/2]).
@@ -41,7 +41,7 @@ get_attribute_modifiers(Attribute, Modifiers) :-
 
 get_attribute_type(Attribute, Type) :-
   is_attribute(Attribute),
-  get_type(Type).
+  get_type(Attribute, Type).
 
 get_attribute_name(Attribute, Name) :-
   is_attribute(Attribute),
@@ -70,21 +70,23 @@ create_modifiers_edges(Attribute, [Modifier|Rest]) :-
   create_edge(Attribute, modifier, Modifier),
   create_modifiers_edges(Attribute, Rest).
 
-create_getter(Class, Attribute, Type, Name) :-
+create_getter(Class, Attribute) :-
+  get_attribute_name(Attribute, Name),
+  get_attribute_type(Attribute, Type),
   capitalize(Name, Capitalized),
   string_concat("get", Capitalized, MethodName),
-  add_method(Class, ['public'], Type, MethodName, [], Method),
-  mark_getter(Attribute, Method).
+  add_method(Class, ['public'], Type, MethodName, [], _).
 
-create_setter(Class, Attribute, Type, Name) :-
+create_setter(Class, Attribute) :-
+  get_attribute_name(Attribute, Name),
+  get_attribute_type(Attribute, Type),
   capitalize(Name, Capitalized),
   string_concat("set", Capitalized, MethodName),
-  add_method(Class, ['public'], void, MethodName, [parameter([], Type, Name)], Method),
-  mark_setter(Attribute, Method).
+  add_method(Class, ['public'], void, MethodName, [parameter([], Type, Name)], _).
 
-create_accessors(Class, Attribute, Type, Name) :-
-  create_getter(Class, Attribute, Type, Name),
-  create_setter(Class, Attribute, Type, Name).
+create_accessors(Class, Attribute) :-
+  create_getter(Class, Attribute),
+  create_setter(Class, Attribute).
 
 add_attribute(Class, Modifiers, Type, Name, Attribute) :-
   atom_string(Name, NameString),
@@ -95,14 +97,3 @@ add_attribute(Class, Modifiers, Type, Name, Attribute) :-
   create_modifiers_edges(Attribute, Modifiers),
   create_edge(Attribute, type, Type),
   create_edge(Attribute, name, NameString).
-
-% Metadata Theorems
-mark_getter(Attribute, Method) :-
-  is_attribute(Attribute),
-  is_method(Method),
-  create_edge(Attribute, getter, Method).
-
-mark_setter(Attribute, Method) :-
-  is_attribute(Attribute),
-  is_method(Method),
-  create_edge(Attribute, setter, Method).

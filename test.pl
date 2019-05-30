@@ -21,7 +21,7 @@ start :-
     File,
     'add-attribute',
     [
-      'com.company.Person',
+      'people.Person',
       '["private"]',
       'String',
       "nickname"

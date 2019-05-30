@@ -4,7 +4,7 @@
 
 :- use_module(model/graph).
 :- use_module(model/class, [get_class_name/2, create_class/6]).
-:- use_module(model/attribute, [add_attribute/5, create_accessors/4]).
+:- use_module(model/attribute, [add_attribute/5, create_accessors/2]).
 :- use_module(model/panel).
 :- use_module(model/field).
 :- use_module(integration/java).
@@ -16,12 +16,12 @@
 transformation('add-attribute', [Class, Modifiers, Type, Name]) :-
   parse_array(Modifiers, ModifiersList), !,
   add_attribute(Class, ModifiersList, Type, Name, Attribute),
-  create_accessors(Class, Attribute, Type, Name),
+  create_accessors(Class, Attribute),
   find_source(vertex(attribute, Attribute), File),
   get_class_name(Class, ClassName),
   inject_attribute(File, ClassName, ModifiersList, Type, Name),
-  inject_getter(File, ClassName, ModifiersList, Name),
-  inject_setter(File, ClassName, ModifiersList, Name).
+  inject_getter(File, ClassName, ['public'], Name),
+  inject_setter(File, ClassName, ['public'], Name).
 
 % Class
 transformation('create-class', [Modifiers, QualifiedName, Interfaces]) :-
@@ -31,7 +31,7 @@ transformation('create-class', [Modifiers, QualifiedName, Parent, Interfaces]) :
   qualified_name(QualifiedName, Package, Name),
   parse_array(Interfaces, InterfacesList), !,
   create_class(Package, ModifiersList, Name, Parent, InterfacesList, Class),
-  create_use_for_name(Name, Use),
+  create_use(Name, Use),
   create_root(vertex(class, Class), Use),
   repository(Repository),
   inject_class(Repository, Package, ModifiersList, Name, Parent, InterfacesList, SourceFile),

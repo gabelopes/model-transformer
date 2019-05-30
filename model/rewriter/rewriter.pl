@@ -3,7 +3,7 @@
   rewrite_linking_file/3
 ]).
 
-:- use_module('../graph', [edge/3, vertex/2, is_root/1]).
+:- use_module('../graph', [edge/3, vertex/2, find_facts/2]).
 :- use_module('../../arrays', [filter/3]).
 :- use_module('../../system/io', [write_lines/2]).
 :- use_module('../../representation/text', [term_to_string/2, sort_strings/2]).
@@ -20,9 +20,9 @@ unset_visited(Fact) :-
 retract_visits :-
   retractall(visited(_)).
 
-% Graph Walking Theorems
-is_property_edge(edge(_, _, Tail)) :-
-  \+ vertex(_, Tail).
+% Root Traversing Theorems
+is_property_edge(edge(_, Label, _)) :-
+  member(Label, [name, package]).
 
 find_outgoing_property_edges(Head, PropertyEdges) :-
   find_outgoing_edges(Head, Edges),
@@ -31,70 +31,47 @@ find_outgoing_property_edges(Head, PropertyEdges) :-
 find_outgoing_edges(Head, Edges) :-
   findall(edge(Head, Label, Tail), edge(Head, Label, Tail), Edges).
 
-are_vertices_equal(vertex(Descriptor, Label), vertex(Descriptor, Label)).
-
 collect_facts(_, [], _, _, []).
-collect_facts(FileRoot, [Fact|Rest], FileRoots, OtherFilesRoots, Facts) :-
-  collect_facts(FileRoot, Fact, FileRoots, OtherFilesRoots, PartialFacts),
-  collect_facts(FileRoot, Rest, FileRoots, OtherFilesRoots, OtherFacts),
+collect_facts(Root, [Fact|Rest], Roots, OtherRoots, Facts) :-
+  collect_facts(Root, Fact, Roots, OtherRoots, PartialFacts),
+  collect_facts(Root, Rest, Roots, OtherRoots, OtherFacts),
   append(PartialFacts, OtherFacts, Facts).
-collect_facts(vertex(FileRootDescriptor, FileRootLabel), vertex(Descriptor, Label), FileRoots, _, []) :-
-  \+ are_vertices_equal(vertex(FileRootDescriptor, FileRootLabel), vertex(Descriptor, Label)),
-  member(vertex(Descriptor, Label), FileRoots).
-collect_facts(FileRoot, vertex(Descriptor, Label), FileRoots, OtherFilesRoots, [vertex(Descriptor, Label)|Rest]) :-
+collect_facts(vertex(RootDescriptor, RootLabel), vertex(Descriptor, Label), Roots, _, []) :-
+  vertex(RootDescriptor, RootLabel) \== vertex(Descriptor, Label),
+  member(vertex(Descriptor, Label), Roots).
+collect_facts(Root, vertex(Descriptor, Label), Roots, OtherRoots, [vertex(Descriptor, Label)|Rest]) :-
   \+ visited(vertex(Descriptor, Label)),
-  member(vertex(Descriptor, Label), OtherFilesRoots),
+  member(vertex(Descriptor, Label), OtherRoots),
   set_visited(vertex(Descriptor, Label)),
   find_outgoing_property_edges(Label, Edges),
-  collect_facts(FileRoot, Edges, FileRoots, OtherFilesRoots, Rest).
-collect_facts(FileRoot, vertex(Descriptor, Label), FileRoots, OtherFilesRoots, [vertex(Descriptor, Label)|Rest]) :-
+  collect_facts(Root, Edges, Roots, OtherRoots, Rest).
+collect_facts(Root, vertex(Descriptor, Label), Roots, OtherRoots, [vertex(Descriptor, Label)|Rest]) :-
   \+ visited(vertex(Descriptor, Label)),
   set_visited(vertex(Descriptor, Label)),
   find_outgoing_edges(Label, Edges),
-  collect_facts(FileRoot, Edges, FileRoots, OtherFilesRoots, Rest).
-collect_facts(FileRoot, edge(Head, Label, Tail), FileRoots, OtherFilesRoots, [edge(Head, Label, Tail)|Rest]) :-
+  collect_facts(Root, Edges, Roots, OtherRoots, Rest).
+collect_facts(Root, edge(Head, Label, Tail), Roots, OtherRoots, [edge(Head, Label, Tail)|Rest]) :-
   \+ visited(edge(Head, Label, Tail)),
   vertex(Descriptor, Tail),
   set_visited(edge(Head, Label, Tail)),
-  collect_facts(FileRoot, vertex(Descriptor, Tail), FileRoots, OtherFilesRoots, Rest).
+  collect_facts(Root, vertex(Descriptor, Tail), Roots, OtherRoots, Rest).
 collect_facts(_, edge(Head, Label, Tail), _, _, [edge(Head, Label, Tail)]) :-
   \+ visited(edge(Head, Label, Tail)),
   set_visited(edge(Head, Label, Tail)).
 collect_facts(_, _, _, _, []).
 
-collect_all_facts([], _, _, []).
-collect_all_facts([FileRoot|Rest], FileRoots, OtherFilesRoots, Facts) :-
-  collect_facts(FileRoot, FileRoot, FileRoots, OtherFilesRoots, PartialFacts),
-  collect_all_facts(Rest, FileRoots, OtherFilesRoots, OtherFacts),
+collect_root_facts([], _, _, []).
+collect_root_facts([Root|Rest], Roots, OtherRoots, Facts) :-
+  collect_facts(Root, Root, Roots, OtherRoots, PartialFacts),
+  collect_root_facts(Rest, Roots, OtherRoots, OtherFacts),
   append(PartialFacts, OtherFacts, Facts).
 
-% Oprhan Vertices Theorems
-is_orphan(vertex(Descriptor, Label)) :-
-  \+ is_root(vertex(Descriptor, Label)),
-  \+ edge(_, _, Label).
-
-collect_orphan_edges([], []).
-collect_orphan_edges([vertex(_, VertexLabel)|Rest], Edges) :-
-  findall(edge(VertexLabel, Label, Tail), edge(VertexLabel, Label, Tail), VertexEdges),
-  collect_orphan_edges(Rest, Partial),
-  append(VertexEdges, Partial, Edges).
-
-collect_orphan_vertices(Vertices) :-
-  findall(vertex(Descriptor, Label), (
-    vertex(Descriptor, Label),
-    is_orphan(vertex(Descriptor, Label))
-  ), Vertices).
-
-collect_orphan_facts(Facts) :-
-  collect_orphan_vertices(Vertices),
-  collect_orphan_edges(Vertices, Edges),
-  append(Vertices, Edges, Facts).
-
-collect_knowledge_base(FileRoots, Roots, KnowledgeBase) :-
-  subtract(Roots, FileRoots, OtherFilesRoots),
-  collect_all_facts(FileRoots, FileRoots, OtherFilesRoots, Facts),
-  collect_orphan_facts(Orphans),
-  append(Facts, Orphans, KnowledgeBase).
+% Knowledge Base Traversing Theorems
+collect_knowledge_base(File, Roots, AllRoots, KnowledgeBase) :-
+  subtract(AllRoots, Roots, OtherRoots),
+  collect_root_facts(Roots, Roots, OtherRoots, RootFacts),
+  find_facts(File, SourceFacts),
+  union(RootFacts, SourceFacts, KnowledgeBase).
 
 %% Knowledge Base Writing
 % Converting Theorems
@@ -118,8 +95,8 @@ write_knowledge_base(File, KnowledgeBase) :-
   finish_writing(Stream).
 
 % Rewriting Theorems
-rewrite_file(File, FileRoots, Roots) :-
-  collect_knowledge_base(FileRoots, Roots, KnowledgeBase),
+rewrite_file(File, Roots, AllRoots) :-
+  collect_knowledge_base(File, Roots, AllRoots, KnowledgeBase),
   write_knowledge_base(File, KnowledgeBase),
   retract_visits.
 

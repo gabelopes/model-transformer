@@ -1,22 +1,22 @@
 :- module(graph, [
-  load_graph/1,
-  unload_graph/0,
+  repository/1,
   edge/3,
   vertex/2,
   create_edge/3,
   replace_edge/2,
   remove_edge/3,
-  remove_all_edges/3,
   create_vertex/2,
   replace_vertex/2,
   remove_vertex/2,
-  remove_all_vertices/2,
   create_root/2,
-  is_root/1,
   create_use/1,
-  create_use_for_name/2,
+  create_use/2,
+  load_graph/1,
+  unload_graph/0,
   find_source/2,
-  repository/1,
+  find_edges/2,
+  find_vertices/2,
+  find_facts/2,
   rewrite_graph/0
 ]).
 
@@ -24,85 +24,71 @@
 :- use_module('../arrays', [filter/3]).
 :- use_module('../representation/qualified_name', [generate_file_name/3]).
 
-:- multifile edge/3.
-:- multifile vertex/2.
-
 :- dynamic loaded/1.
+:- dynamic repository/1.
 :- dynamic use/1.
 :- dynamic root/2.
-:- dynamic edge/3.
-:- dynamic vertex/2.
-:- dynamic repository/1.
+:- dynamic source_edge/4.
+:- dynamic source_vertex/3.
 
 % Graph Theorems
+edge(Head, Label, Tail) :-
+  source_edge(Head, Label, Tail, _).
+
 create_edge(Head, Label, Tail) :-
-  assertz(edge(Head, Label, Tail)).
+  assertz(source_edge(Head, Label, Tail, null)).
 
 replace_edge(edge(Head, Label, Tail), edge(ForHead, ForLabel, ForTail)) :-
   remove_edge(Head, Label, Tail),
   create_edge(ForHead, ForLabel, ForTail).
 
 remove_edge(Head, Label, Tail) :-
-  retract(edge(Head, Label, Tail)).
+  retractall(source_edge(Head, Label, Tail, _)).
 remove_edge(_, _, _).
 
-remove_all_edges(Head, Label, Tail) :-
-  retractall(edge(Head, Label, Tail)).
-remove_all_edges(_, _, _).
+vertex(Descriptor, Label) :-
+  source_vertex(Descriptor, Label, _).
 
 create_vertex(Descriptor, Label) :-
-  assertz(vertex(Descriptor, Label)).
+  assertz(source_vertex(Descriptor, Label, null)).
 
 replace_vertex(vertex(Descriptor, Label), vertex(ForDescriptor, ForLabel)) :-
   remove_vertex(Descriptor, Label),
   create_vertex(ForDescriptor, ForLabel).
 
 remove_vertex(Descriptor, Label) :-
-  retract(vertex(Descriptor, Label)).
+  retractall(source_vertex(Descriptor, Label, _)).
 remove_vertex(_, _).
 
-remove_all_vertices(Descriptor, Label) :-
-  retractall(vertex(Descriptor, Label)).
-remove_all_vertices(_, _).
-
-retract_graph :-
-  retractall(edge(_, _, _)),
-  retractall(vertex(_, _)).
-
-% Links Theorems
-create_root(Term, File) :-
-  assertz(root(Term, File)).
+% Root Theorems
+create_root(Fact, Source) :-
+  assertz(root(Fact, Source)).
 create_root(_, _).
 
-create_roots([], _).
-create_roots([Term|Rest], File) :-
-  create_root(Term, File),
-  create_roots(Rest, File).
+% Source Theorems
+create_source_graph([], _).
+create_source_graph([root(Fact)|Rest], Source) :-
+  create_root(Fact, Source),
+  create_source_graph(Rest, Source).
+create_source_graph([vertex(Descriptor, Label)|Rest], Source) :-
+  assertz(source_vertex(Descriptor, Label, Source)),
+  create_source_graph(Rest, Source).
+create_source_graph([edge(Head, Label, Tail)|Rest], Source) :-
+  assertz(source_edge(Head, Label, Tail, Source)),
+  create_source_graph(Rest, Source).
+create_source_graph([_|Rest], Source) :-
+  create_source_graph(Rest, Source).
 
-create_roots([]).
-create_roots([use(Use)|Rest]) :-
-  consult(Use),
-  find_root_vertices(Vertices),
-  create_roots(Vertices, Use),
-  retract_graph,
-  create_roots(Rest).
-
-find_root_vertices(Roots) :-
-  findall(vertex(Descriptor, Label), vertex(Descriptor, Label), Vertices),
-  filter(Vertices, graph:is_root, Roots).
-
-is_root(vertex(class, Class)) :-
-  edge(Class, Label, _),
-  \+ member(Label, [name, package]).
-
-retract_roots :-
+retract_source_graph :-
+  retractall(source_edge(_, _, _, _)),
+  retractall(source_vertex(_, _, _)),
   retractall(root(_, _)).
 
 % Uses Theorems
 create_use(File) :-
   assertz(use(File)).
 
-create_use_for_name(Name, Use) :-
+create_use(Name, Use) :-
   loaded(LinkingFile),
   generate_file_name(LinkingFile, Name, FileName),
   atom_concat(FileName, '.pl', Use),
@@ -116,29 +102,28 @@ retract_uses :-
 
 % Module Theorems
 retract_all :-
-  retract_graph,
-  retract_roots,
+  retract_source_graph,
   retract_uses.
 
-% Consulting Theorems
-consult_all([]).
-consult_all([use(Use)|Rest]) :-
-  consult(Use),
-  consult_all(Rest).
+% Graph Creating Theorems
+create_graph([]).
+create_graph([use(Use)|Rest]) :-
+  read_file_to_terms(Use, Terms, []),
+  create_source_graph(Terms, Use),
+  create_graph(Rest).
 
 % Loading Theorems
 loaded(false).
 
-set_loaded(Bool) :-
-  retract(loaded(_)),
-  assertz(loaded(Bool)).
+set_loaded(File) :-
+  retractall(loaded(_)),
+  assertz(loaded(File)).
 
 load_graph(File) :-
   loaded(false),
   consult(File),
   find_uses(Uses),
-  create_roots(Uses),
-  consult_all(Uses),
+  create_graph(Uses),
   set_loaded(File), !.
 
 unload_graph :-
@@ -146,36 +131,39 @@ unload_graph :-
   set_loaded(false).
 
 % Searching Theorems
-find_root(vertex(Descriptor, Label), File) :-
-  root(vertex(Descriptor, Label), File).
-find_root(vertex(Descriptor, Label), File) :-
-  \+ is_root(Descriptor, Label),
+find_source(vertex(_, Label), Source) :-
+  edge(Label, source, Source).
+find_source(vertex(Descriptor, Label), Source) :-
+  \+ root(vertex(Descriptor, Label), _),
   edge(ParentLabel, _, Label),
-  ParentLabel \= Label,
+  ParentLabel \== Label,
   vertex(ParentDescriptor, ParentLabel),
-  find_root(vertex(ParentDescriptor, ParentLabel), File).
+  find_source(vertex(ParentDescriptor, ParentLabel), Source).
 
-find_source(vertex(_, Label), File) :-
-  edge(Label, source, File).
-find_source(vertex(Descriptor, Label), File) :-
-  \+ is_root(vertex(Descriptor, Label)),
-  edge(ParentLabel, _, Label),
-  ParentLabel \= Label,
-  vertex(ParentDescriptor, ParentLabel),
-  find_source(vertex(ParentDescriptor, ParentLabel), File).
+find_roots(Source, Roots) :-
+  findall(Fact, root(Fact, Source), Roots).
 
-find_file_roots(File, Roots) :-
-  findall(Term, root(Term, File), Roots).
+find_roots(Roots) :-
+  findall(Fact, root(Fact, _), Roots).
 
-find_all_roots(Roots) :-
-  findall(Term, root(Term, _), Roots).
+find_edges(Source, Edges) :-
+  findall(edge(Head, Tail, Label), source_edge(Head, Tail, Label, Source), Edges).
+
+find_vertices(Source, Vertices) :-
+  findall(vertex(Descriptor, Label), source_vertex(Descriptor, Label, Source), Vertices).
+
+find_facts(Source, [root(Root)|Facts]) :-
+  find_edges(Source, Edges),
+  find_vertices(Source, Vertices),
+  root(Root, Source),
+  union(Edges, Vertices, Facts).
 
 % Rewriting Theorems
 rewrite_files([]).
 rewrite_files([use(Use)|Rest]) :-
-  find_file_roots(Use, FileRoots),
-  find_all_roots(Roots),
-  rewrite_file(Use, FileRoots, Roots),
+  find_roots(Use, Roots),
+  find_roots(AllRoots),
+  rewrite_file(Use, Roots, AllRoots),
   rewrite_files(Rest).
 
 rewrite_graph :-
